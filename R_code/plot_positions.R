@@ -58,19 +58,74 @@ plot_positions <- function(data_df, position_mapping = position_mapping_default)
     group_by(X, Y) %>%
     tally() %>%
     ungroup()
+
   
-  # Plot
+  # Get unique positions and the associated shape codes
+  unique_positions <- unique(as.character(merged_df$Best_Pos))
+  shape_codes <- c(16, 17, 15, 3, 8, 24, 23, 0:25)  # add more shape codes if needed
+  shape_codes <- shape_codes[1:length(unique_positions)]
+  
+  
+  
+  # Compute the total number of players
+  total_players <- nrow(merged_df)
+  
+  # Calculate the counts for each (X, Y) combination
+  counts_df <- merged_df %>%
+    group_by(X, Y) %>%
+    summarise(count = n())
+
+  # Create LastName to create LastName label option
+  merged_df$LastName <- sapply(strsplit(merged_df$Name, " "), tail, 1)
+ 
+  # Radial Jitter section
+  radius <- 0.25  # You can adjust this value to increase/decrease distance from the point
+  
+  # Compute the number of players for each coordinate
+  count_data <- merged_df %>% group_by(X, Y) %>% summarise(n = n())
+  
+  # Join this back to merged_df
+  merged_df <- left_join(merged_df, count_data)
+  
+  # Compute the angle for each player around their Best_Pos
+  merged_df <- merged_df %>% group_by(X, Y) %>% mutate(angle = row_number() * (2*pi/n))
+  
+  # Calculate the new x and y offsets for the last names
+  merged_df$label_x <- merged_df$X + radius * cos(merged_df$angle)
+  merged_df$label_y <- merged_df$Y + radius * sin(merged_df$angle)
+  
+     
   plot <- ggplot(data = merged_df, aes(x = X, y = Y)) +
-    ggtitle("Squad Depth") +
-    geom_bin2d(aes(fill = ..count.. / total_unique_players), bins = 30) + 
-    scale_fill_gradient(name = "Percentage of Total Players", 
-                        labels = scales::percent_format(scale = 100),
-                        low = "red", 
-                        high = "green") +
-    geom_point(aes(color = Best_Pos), size = 3, shape = 21, stroke = 1.5) +
-    labs(color = "Position") +
+    
+    # For the heatmap
+    geom_bin2d(aes(fill = ..count..), bins = 30) + 
+    
+    # Points for each position
+    geom_point(aes(color = Best_Pos), size = 3) + 
+    
+    # Position label below the point
+    geom_text(aes(label = Best_Pos), size = 2.5, vjust = 2.5, hjust = 0.5) +
+    
+    # Jitter the player names around their Best_Pos
+    #geom_text(aes(label = Name), position = position_jitter(width = 0.3, height = 0.3), size = 2.5, alpha = 0.7) +
+    #geom_text(aes(label = LastName), position = position_jitter(width = 0.3, height = 0.3), size = 2.5, alpha = 0.7) +
+    
+    # Place the player last names radially around their Best_Pos
+    geom_text(aes(x = label_x, y = label_y, label = LastName), size = 2.5, alpha = 0.7) +
+    
+    
+    # Count of players at each position using counts_df
+    geom_text(data = counts_df, aes(label = count), vjust = -1, hjust = 0.5, size = 2.5, color = "black") +
+    
+    # Adjusted gradient scale for clarity
+    scale_fill_gradient(name = "Number of Players", low = "red", high = "green") +
+    
     theme_minimal() +
-    geom_text(data = coord_counts, aes(label = n), check_overlap = TRUE, vjust = -1)
-  
+    labs(title = "Squad Depth") +
+    
+    # Additional theme customization to remove the unwanted legends
+    theme(legend.position = "bottom") +
+    guides(color=FALSE)
+
   return(plot)
 }
