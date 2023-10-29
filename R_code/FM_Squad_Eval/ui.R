@@ -7,19 +7,31 @@
 #    http://shiny.rstudio.com/
 #
 # ui.R
-
 library(shiny)
 
+# Define the UI
 shinyUI(
   fluidPage(
-    titlePanel("Dynamic Player Attributes Visualization"),
+    titlePanel("Dynamic Player Visualization"),
     
+    # Sidebar layout with input and output definitions
     sidebarLayout(
+      
+      # Inputs
       sidebarPanel(
+        # Dropdown for selecting attribute
         selectInput("attribute", "Choose an attribute:", 
-                    choices = c("Height", "Morale", "ACC"))
+                    choices = c("Height", "Morale", "ACC"), 
+                    selected = "Height"),
+        
+        # Slider for point size
+        sliderInput("pointSize", "Point Size:", min = 1, max = 5, value = 3),
+        
+        # Checkbox for displaying names
+        checkboxInput("showNames", "Display Player Names", TRUE)
       ),
       
+      # Output
       mainPanel(
         plotOutput("playerPlot")
       )
