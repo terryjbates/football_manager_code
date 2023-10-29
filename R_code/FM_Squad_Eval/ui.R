@@ -1,39 +1,26 @@
-#
-# This is the user-interface definition of a Shiny web application. You can
-# run the application by clicking 'Run App' above.
-#
-# Find out more about building applications with Shiny here:
-#
-#    http://shiny.rstudio.com/
-#
-# ui.R
 library(shiny)
+library(ggplot2)
 
-# Define the UI
-shinyUI(
-  fluidPage(
-    titlePanel("Dynamic Player Visualization"),
+ui <- fluidPage(
+  titlePanel("Football Manager Squad Evaluation"),
+  
+  sidebarLayout(
+    sidebarPanel(
+      selectInput("attribute", 
+                  "Select Player Attribute:", 
+                  choices = colnames(data_df)[3:ncol(data_df)], 
+                  selected = "Height"),
+      sliderInput("n", "Number of Top Players:", min = 5, max = 30, value = 10),
+      sliderInput("textSize", "Label Size:", min = 2, max = 10, value = 4, step = 0.5),
+      checkboxInput("show_names", "Show Player Names", TRUE)
+    ),
     
-    # Sidebar layout with input and output definitions
-    sidebarLayout(
-      
-      # Inputs
-      sidebarPanel(
-        # Dropdown for selecting attribute
-        selectInput("attribute", "Choose an attribute:", 
-                    choices = c("Height", "Morale", "ACC"), 
-                    selected = "Height"),
-        
-        # Slider for point size
-        sliderInput("pointSize", "Point Size:", min = 1, max = 5, value = 3),
-        
-        # Checkbox for displaying names
-        checkboxInput("showNames", "Display Player Names", TRUE)
-      ),
-      
-      # Output
-      mainPanel(
-        plotOutput("playerPlot")
+    mainPanel(
+      tabsetPanel(
+        tabPanel("Coordinate Plot", plotOutput("coordinatePlot")),
+        tabPanel("Scatter Plot", plotOutput("scatterPlot")),
+        tabPanel("Bar Graph", plotOutput("barGraph")),
+        tabPanel("Histogram", plotOutput("histogramPlot"))
       )
     )
   )
