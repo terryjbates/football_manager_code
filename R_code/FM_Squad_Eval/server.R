@@ -73,6 +73,11 @@ function(input, output) {
     selected_classes <- unlist(player_class[input$playerClass])
     filtered_df <- merged_df %>% filter(Class %in% selected_classes)
     
+    # Validate that filtered_df has some rows
+    validate(
+      need(nrow(filtered_df) > 0, "Please select one or more player classes to view.")
+    )
+    
     # Extract last names
     last_names <- sapply(strsplit(filtered_df$Name, " "), function(x) tail(x, 1))
     
@@ -106,8 +111,20 @@ function(input, output) {
   
   # Scatter Plot
   output$scatterPlot <- renderPlot({
-    ggplot(data_df, aes(x = Weight , y = Height)) +
-      geom_point(aes(color = data_df[[input$attribute]]), size = 4) +
+    # Filter based on selected classes
+    selected_classes <- unlist(player_class[input$playerClass])
+    filtered_df <- data_df %>% 
+      left_join(map_df, by = "Best_Pos") %>% 
+      left_join(player_class_df, by = "Y") %>% 
+      filter(Class %in% selected_classes)
+    
+    # Validate that filtered_df has some rows
+    validate(
+      need(nrow(filtered_df) > 0, "Please select one or more player classes to view.")
+    )
+    
+    ggplot(filtered_df, aes(x = Weight , y = Height)) +
+      geom_point(aes(color = filtered_df[[input$attribute]]), size = 4) +
       theme_minimal() +
       geom_text_repel(aes(label =  gsub("Player ", "", Name)), box.padding = unit(0.5, "lines"), size = input$textSize) +
       labs(color = input$attribute)
@@ -115,8 +132,19 @@ function(input, output) {
   
   # Bar Graph
   output$barGraph <- renderPlot({
-    top_players <- head(data_df[order(-data_df[[input$attribute]]), ], n = input$n)
-    ggplot(top_players, aes(x = reorder(gsub("Player ", "", Name), -data_df[[input$attribute]]), y = data_df[[input$attribute]])) +
+    selected_classes <- unlist(player_class[input$playerClass])
+    filtered_df <- data_df %>% 
+      left_join(map_df, by = "Best_Pos") %>% 
+      left_join(player_class_df, by = "Y") %>% 
+      filter(Class %in% selected_classes)
+    
+    # Validate that filtered_df has some rows
+    validate(
+      need(nrow(filtered_df) > 0, "Please select one or more player classes to view.")
+    )
+    
+    top_players <- head(filtered_df[order(-filtered_df[[input$attribute]]), ], n = input$n)
+    ggplot(top_players, aes(x = reorder(gsub("Player ", "", Name), -filtered_df[[input$attribute]]), y = filtered_df[[input$attribute]])) +
       geom_bar(stat = "identity") +
       theme_minimal() +
       coord_flip() +
@@ -125,7 +153,19 @@ function(input, output) {
   
   # Histogram
   output$histogramPlot <- renderPlot({
-    ggplot(data_df, aes(x = data_df[[input$attribute]])) +
+    # Filter based on selected classes
+    selected_classes <- unlist(player_class[input$playerClass])
+    filtered_df <- data_df %>% 
+      left_join(map_df, by = "Best_Pos") %>% 
+      left_join(player_class_df, by = "Y") %>% 
+      filter(Class %in% selected_classes)
+    
+    # Validate that filtered_df has some rows
+    validate(
+      need(nrow(filtered_df) > 0, "Please select one or more player classes to view.")
+    )
+    
+    ggplot(filtered_df, aes(x = filtered_df[[input$attribute]])) +
       geom_histogram(binwidth = 5) +
       theme_minimal() +
       labs(x = input$attribute)
