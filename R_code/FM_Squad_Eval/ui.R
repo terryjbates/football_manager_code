@@ -10,7 +10,7 @@ ui <- fluidPage(
                     "Select Player Attribute:", 
                     choices = colnames(data_df)[3:ncol(data_df)], 
                     selected = "Height"),
-        sliderInput("n", "Number of Top Players:", min = 5, max = 30, value = 10),
+        sliderInput("n", "Number of Top Players:", min = 2, max = 30, value = 10),
         sliderInput("textSize", "Label Size:", min = 2, max = 10, value = 4, step = 0.5),
         checkboxInput("show_names", "Show Player Names", TRUE),
         # Add a checkbox group for player class filtering

@@ -92,8 +92,12 @@ function(input, output, session) {
     
   # Create a reactive expression for the coordinate plot
   output$coordinatePlot <- renderPlot({
+    
     # Merge the map_df with the data_df to get the coordinates
-    merged_df <- left_join(data_df, map_df, by = "Best_Pos")
+    # Then sort and filter the top n players
+    top_n_players <- data_df %>% arrange(desc(get(input$attribute))) %>% head(n = input$n)
+    merged_df <- left_join(top_n_players, map_df, by = "Best_Pos")
+    
     
     # Join with the player class mapping
     merged_df <- left_join(merged_df, player_class_df, by = "Y")
@@ -153,7 +157,9 @@ function(input, output, session) {
         plot_output_id <- paste0("plot_", club_name)
         
         output[[plot_output_id]] <- renderPlot({
-          
+          # Get the top n players from this club
+          top_n_players_club <- data_df[data_df$Club == club_name, ] %>% arrange(desc(get(input$attribute))) %>% head(n = input$n)
+          club_df <- top_n_players_club
           club_df <- data_df[data_df$Club == club_name, ]
           
           # Your existing code for the coordinate plot with club_df in place of data_df
