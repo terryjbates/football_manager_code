@@ -129,7 +129,13 @@ function(input, output, session) {
              x_offset = ifelse(is.na(X), 0, 0.3 * cos(angle)), # Adjust 0.3 for desired label distance
              y_offset = ifelse(is.na(Y), 0, 0.3 * sin(angle))) %>%
       ungroup()
-    
+ 
+    # Calculate descriptive statistics
+    mean_val <- mean(top_n_players[[input$attribute]], na.rm = TRUE)
+    median_val <- median(top_n_players[[input$attribute]], na.rm = TRUE)
+    min_val <- min(top_n_players[[input$attribute]], na.rm = TRUE)
+    max_val <- max(top_n_players[[input$attribute]], na.rm = TRUE)
+       
     # Plot
     ggplot(data = filtered_df, aes(x = as.numeric(X), y = as.numeric(Y))) +
       geom_point(aes(color = as.factor(Best_Pos)), size = 3) +
@@ -144,7 +150,9 @@ function(input, output, session) {
       ylab("Byline") +
       geom_segment(aes(x = -1, y = -1, xend = 1, yend = -1), size = 1.5) + # Bottom horizontal
       geom_segment(aes(x = -1, y = -1, xend = -1, yend = 0), size = 1.5) + # Left vertical
-      geom_segment(aes(x = 1, y = -1, xend = 1, yend = 0), size = 1.5)    # Right vertical
+      geom_segment(aes(x = 1, y = -1, xend = 1, yend = 0), size = 1.5) +   # Right vertical
+      labs(title = paste0("Squad Depth\nMean: ", round(mean_val, 2), 
+                          " Median: ", round(median_val, 2), " Min: ", min_val, " Max: ", max_val))
   })
   
   # Generate plots for each club dynamically
@@ -196,7 +204,13 @@ function(input, output, session) {
                    x_offset = ifelse(is.na(X), 0, 0.3 * cos(angle)), # Adjust 0.3 for desired label distance
                    y_offset = ifelse(is.na(Y), 0, 0.3 * sin(angle))) %>%
             ungroup()
-          
+
+          # Calculate descriptive statistics
+          mean_val <- mean(top_n_players_club[[input$attribute]], na.rm = TRUE)
+          median_val <- median(top_n_players_club[[input$attribute]], na.rm = TRUE)
+          min_val <- min(top_n_players_club[[input$attribute]], na.rm = TRUE)
+          max_val <- max(top_n_players_club[[input$attribute]], na.rm = TRUE)
+
           # Plot
           ggplot(data = filtered_df, aes(x = as.numeric(X), y = as.numeric(Y))) +
             geom_point(aes(color = as.factor(Best_Pos)), size = 3) +
@@ -210,7 +224,9 @@ function(input, output, session) {
             ylab("Byline") +
             geom_segment(aes(x = -1, y = -1, xend = 1, yend = -1), size = 1.5) + # Bottom horizontal
             geom_segment(aes(x = -1, y = -1, xend = -1, yend = 0), size = 1.5) + # Left vertical
-            geom_segment(aes(x = 1, y = -1, xend = 1, yend = 0), size = 1.5)    # Right vertical
+            geom_segment(aes(x = 1, y = -1, xend = 1, yend = 0), size = 1.5)  +  # Right vertical
+            labs(title = paste0("Squad Depth\nMean: ", round(mean_val, 2), 
+                                " Median: ", round(median_val, 2), " Min: ", min_val, " Max: ", max_val))
           
         })
         
