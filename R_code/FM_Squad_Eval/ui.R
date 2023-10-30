@@ -12,7 +12,17 @@ ui <- fluidPage(
                   selected = "Height"),
       sliderInput("n", "Number of Top Players:", min = 5, max = 30, value = 10),
       sliderInput("textSize", "Label Size:", min = 2, max = 10, value = 4, step = 0.5),
-      checkboxInput("show_names", "Show Player Names", TRUE)
+      checkboxInput("show_names", "Show Player Names", TRUE),
+      # Add a checkbox group for player class filtering
+      checkboxGroupInput("playerClass", 
+                         label = "Select player classes to view", 
+                         choices = c("Goalkeepers" = 0, 
+                                     "Defenders" = 1,
+                                     "Defensive Midfielders" = 2,
+                                     "Central Midfielders" = 3,
+                                     "Attacking Midfielders" = 4,
+                                     "Forwards" = 5),
+                         selected = 0:5) # Default all selected
     ),
     
     mainPanel(
