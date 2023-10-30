@@ -43,6 +43,11 @@ function(input, output, session) {
     `5` = c("Forwards")
   )
   
+  # Add truncation function
+  truncate_text <- function(text, maxlen = 8) {
+    ifelse(nchar(text) > maxlen, paste0(substr(text, 1, maxlen-3), "."), text)
+  }
+  
   
   player_class_df <- stack(player_class)
   colnames(player_class_df) <- c("Class", "Y")
@@ -127,7 +132,8 @@ function(input, output, session) {
       theme_minimal() +
       theme(legend.position = "none") +
       labs(title = "Squad Depth") +
-      geom_text(aes(x = X + x_offset, y = Y + y_offset, label =  gsub("Player ", "", Name)), size = input$textSize) +
+      #geom_text(aes(x = X + x_offset, y = Y + y_offset, label =  truncate_text(gsub("Player ", "", Name))     ), size = input$textSize) +
+      geom_text(aes(x = X + x_offset, y = Y + y_offset, label = label ), size = input$textSize) +
       ylim(-1,6) +
       xlim(-3,3) +
       xlab("Touchline") +
@@ -191,7 +197,7 @@ function(input, output, session) {
             theme_minimal() +
             theme(legend.position = "none") +
             labs(title = paste0(club_name, " Squad Depth")) +
-            geom_text(aes(x = X + x_offset, y = Y + y_offset, label =  gsub("Player ", "", Name)), size = input$textSize) +
+            geom_text(aes(x = X + x_offset, y = Y + y_offset, label = label), size = input$textSize) +
             ylim(-1,6) +
             xlim(-3,3) +
             xlab("Touchline") +
