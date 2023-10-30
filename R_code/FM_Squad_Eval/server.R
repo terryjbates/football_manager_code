@@ -96,7 +96,7 @@ function(input, output, session) {
     # Merge the map_df with the data_df to get the coordinates
     # Then sort and filter the top n players
     top_n_players <- data_df %>% arrange(desc(get(input$attribute))) %>% head(n = input$n)
-    merged_df <- left_join(top_n_players, map_df, by = "Best_Pos")
+    merged_df <- left_join(top_n_players, map_df, by = "Best_Pos", relationship = "many-to-many")
     
     
     # Join with the player class mapping
@@ -130,6 +130,8 @@ function(input, output, session) {
              y_offset = ifelse(is.na(Y), 0, 0.3 * sin(angle))) %>%
       ungroup()
     
+
+ 
     # Plot
     ggplot(data = filtered_df, aes(x = as.numeric(X), y = as.numeric(Y))) +
       geom_point(aes(color = as.factor(Best_Pos)), size = 3) +
@@ -164,7 +166,7 @@ function(input, output, session) {
           
           # Your existing code for the coordinate plot with club_df in place of data_df
           # Merge the map_df with the club_df to get the coordinates
-          merged_df <- left_join(club_df, map_df, by = "Best_Pos")
+          merged_df <- left_join(club_df, map_df, by = "Best_Pos", relationship = "many-to-many")
           
           # Join with the player class mapping
           merged_df <- left_join(merged_df, player_class_df, by = "Y")
