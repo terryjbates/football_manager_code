@@ -1,25 +1,7 @@
-# Sample data
-#data_df <- data.frame(
-#  Name = c("Player Abacus", "Player Bolshivek", "Player Comrade", "Player Druze", "Player Erroll"),
-#  Best_Pos = c("GK", "D (C)", "AM (L)", "ST (C)", "M (C)"),
-#  Height = c(180, 185, 170, 175, 182),
-#  Weight = c(70, 78, 65, 72, 68),
-#  Age = c(24, 26, 22, 23, 25)
-#)
+# "Real" FM data read from disk. See bottom for previous data_df.
 
-# Sample data with clubs
-#data_df <- data.frame(
-#  Name = c("Player Abacus", "Player Bolshivek", "Player Comrade", "Player Druze", "Player Erroll"),
-#  Best_Pos = c("GK", "D (C)", "AM (L)", "ST (C)", "M (C)"),
-#  Height = c(180, 185, 170, 175, 182),
-#  Weight = c(70, 78, 65, 72, 68),
-#  Age = c(24, 26, 22, 23, 25),
-#  Club = c("Kashima", "Kashima", "Kawasaki", "VentForet", "Kawasaki")
-#)
-
-# "Real" FM data read from disk
-
-data_df <- read.table("kawa_player_data.txt", header = TRUE, sep ="\t")
+data_df <-
+  read.table("kawa_player_data.txt", header = TRUE, sep = "\t")
 
 # Create LastName to create LastName label option
 data_df$LastName <- sapply(strsplit(data_df$Name, " "), tail, 1)
@@ -63,6 +45,25 @@ player_class <- list(
 )
 
 
+# Sample data
+#data_df <- data.frame(
+#  Name = c("Player Abacus", "Player Bolshivek", "Player Comrade", "Player Druze", "Player Erroll"),
+#  Best_Pos = c("GK", "D (C)", "AM (L)", "ST (C)", "M (C)"),
+#  Height = c(180, 185, 170, 175, 182),
+#  Weight = c(70, 78, 65, 72, 68),
+#  Age = c(24, 26, 22, 23, 25)
+#)
+
+# Sample data with clubs
+#data_df <- data.frame(
+#  Name = c("Player Abacus", "Player Bolshivek", "Player Comrade", "Player Druze", "Player Erroll"),
+#  Best_Pos = c("GK", "D (C)", "AM (L)", "ST (C)", "M (C)"),
+#  Height = c(180, 185, 170, 175, 182),
+#  Weight = c(70, 78, 65, 72, 68),
+#  Age = c(24, 26, 22, 23, 25),
+#  Club = c("Kashima", "Kashima", "Kawasaki", "VentForet", "Kawasaki")
+#)
+
 # Sample data_df
 #  data_df <- data.frame(
 #    Name = c("Player Abacus", "Player Bolshivek", "Player Comrade", "Player Druze"),
@@ -88,4 +89,4 @@ player_class <- list(
 #    Height = c(180, 185, 170, 175, 182),
 #    Weight = c(70, 78, 65, 72, 68),
 #    Age = c(24, 26, 22, 23, 25)
-#  )  
+#  ) 
