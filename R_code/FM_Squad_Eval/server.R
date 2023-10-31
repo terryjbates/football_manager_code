@@ -5,43 +5,6 @@ library(tidyr)
 library(ggrepel)
 
 function(input, output, session) {
-  # Position mapping
-  position_mapping_default <- list(
-    `0,0` = c("GK"),
-    `-2,1` = c("D (L)", "D/WB (L)"),
-    `-1,1` = c("D (C)"),
-    `0,1` = c("D (C)"),
-    `1,1` = c("D (C)"),
-    `2,1` = c("D (R)", "D/WB (R)"),
-    `-2,2` = c("D/WB (L)"),
-    `-1,2` = c("DM"),
-    `0,2` = c("DM"),
-    `1,2` = c("DM"),
-    `2,2` = c("D/WB (R)"),
-    `-2,3` = c("M/AM (L)"),
-    `-1,3` = c("M (C)"),
-    `0,3` = c("M (C)"),
-    `1,3` = c("M (C)"),
-    `2,3` = c("M/AM (R)"),
-    `-2,4` = c("M/AM (L)", "AM (L)"),
-    `-1,4` = c("AM (C)"),
-    `0,4` = c("AM (C)"),
-    `1,4` = c("AM (C)"),
-    `2,4` = c("M/AM (R)", "AM (R)"),
-    `-1,5` = c("ST (L)"),
-    `0,5` = c("ST (C)"),
-    `1,5` = c("ST (R)")
-  )
-  
-  # Player class mapping
-  player_class <- list(
-    `0` = c("Goalkeepers"),
-    `1` = c("Defenders"),
-    `2` = c("Defensive Midfielders"),
-    `3` = c("Central Midfielders"),
-    `4` = c("Attacking Midfielders"),
-    `5` = c("Forwards")
-  )
   
   # Add truncation function
   truncate_text <- function(text, maxlen = 8) {
@@ -130,9 +93,13 @@ function(input, output, session) {
              y_offset = ifelse(is.na(Y), 0, 0.3 * sin(angle))) %>%
       ungroup()
     
-
- 
-    # Plot
+    # Calculate descriptive statistics
+    mean_val <- mean(top_n_players[[input$attribute]], na.rm = TRUE)
+    median_val <- median(top_n_players[[input$attribute]], na.rm = TRUE)
+    min_val <- min(top_n_players[[input$attribute]], na.rm = TRUE)
+    max_val <- max(top_n_players[[input$attribute]], na.rm = TRUE)
+    
+    # Plot single coordinate plot
     ggplot(data = filtered_df, aes(x = as.numeric(X), y = as.numeric(Y))) +
       geom_point(aes(color = as.factor(Best_Pos)), size = 3) +
       theme_minimal() +
@@ -146,7 +113,10 @@ function(input, output, session) {
       ylab("Byline") +
       geom_segment(aes(x = -1, y = -1, xend = 1, yend = -1), size = 1.5) + # Bottom horizontal
       geom_segment(aes(x = -1, y = -1, xend = -1, yend = 0), size = 1.5) + # Left vertical
-      geom_segment(aes(x = 1, y = -1, xend = 1, yend = 0), size = 1.5)    # Right vertical
+      geom_segment(aes(x = 1, y = -1, xend = 1, yend = 0), size = 1.5) +   # Right vertical
+      labs(title = paste0("Squad Depth\nMean: ", round(mean_val, 2),
+                          " Median: ", round(median_val, 2), " Min: ", min_val, 
+                          " Max: ", max_val))
   })
   
   # Generate plots for each club dynamically
@@ -199,7 +169,13 @@ function(input, output, session) {
                    y_offset = ifelse(is.na(Y), 0, 0.3 * sin(angle))) %>%
             ungroup()
           
-          # Plot
+          # Calculate descriptive statistics
+          mean_val <- mean(top_n_players_club[[input$attribute]], na.rm = TRUE)
+          median_val <- median(top_n_players_club[[input$attribute]], na.rm = TRUE)
+          min_val <- min(top_n_players_club[[input$attribute]], na.rm = TRUE)
+          max_val <- max(top_n_players_club[[input$attribute]], na.rm = TRUE)
+          
+          # Plot club-specific coordinate plot
           ggplot(data = filtered_df, aes(x = as.numeric(X), y = as.numeric(Y))) +
             geom_point(aes(color = as.factor(Best_Pos)), size = 3) +
             theme_minimal() +
@@ -212,8 +188,11 @@ function(input, output, session) {
             ylab("Byline") +
             geom_segment(aes(x = -1, y = -1, xend = 1, yend = -1), size = 1.5) + # Bottom horizontal
             geom_segment(aes(x = -1, y = -1, xend = -1, yend = 0), size = 1.5) + # Left vertical
-            geom_segment(aes(x = 1, y = -1, xend = 1, yend = 0), size = 1.5)    # Right vertical
-          
+            geom_segment(aes(x = 1, y = -1, xend = 1, yend = 0), size = 1.5)  +  # Right vertical
+            labs(title = paste0("Squad Depth\nMean: ", round(mean_val, 2),
+                                " Median: ", round(median_val, 2), 
+                                " Min: ", min_val, " Max: ", max_val))
+                                
         })
         
       })

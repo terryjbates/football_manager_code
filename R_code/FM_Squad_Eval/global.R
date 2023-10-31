@@ -24,6 +24,7 @@ data_df <- read.table("kawa_player_data.txt", header = TRUE, sep ="\t")
 # Create LastName to create LastName label option
 data_df$LastName <- sapply(strsplit(data_df$Name, " "), tail, 1)
 
+# Position mapping
 position_mapping_default <- list(
   `0,0` = c("GK"),
   `-2,1` = c("D (L)", "D/WB (L)"),
@@ -31,28 +32,34 @@ position_mapping_default <- list(
   `0,1` = c("D (C)"),
   `1,1` = c("D (C)"),
   `2,1` = c("D (R)", "D/WB (R)"),
-  
   `-2,2` = c("D/WB (L)"),
   `-1,2` = c("DM"),
   `0,2` = c("DM"),
   `1,2` = c("DM"),
   `2,2` = c("D/WB (R)"),
-  
   `-2,3` = c("M/AM (L)"),
   `-1,3` = c("M (C)"),
   `0,3` = c("M (C)"),
   `1,3` = c("M (C)"),
   `2,3` = c("M/AM (R)"),
-  
   `-2,4` = c("M/AM (L)", "AM (L)"),
   `-1,4` = c("AM (C)"),
   `0,4` = c("AM (C)"),
   `1,4` = c("AM (C)"),
   `2,4` = c("M/AM (R)", "AM (R)"),
-  
   `-1,5` = c("ST (L)"),
   `0,5` = c("ST (C)"),
   `1,5` = c("ST (R)")
+)
+
+# Player class mapping
+player_class <- list(
+  `0` = c("Goalkeepers"),
+  `1` = c("Defenders"),
+  `2` = c("Defensive Midfielders"),
+  `3` = c("Central Midfielders"),
+  `4` = c("Attacking Midfielders"),
+  `5` = c("Forwards")
 )
 
 
