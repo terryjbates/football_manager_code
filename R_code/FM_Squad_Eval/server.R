@@ -112,53 +112,82 @@ function(input, output, session) {
     min_val <- min(top_n_players[[input$attribute]], na.rm = TRUE)
     max_val <- max(top_n_players[[input$attribute]], na.rm = TRUE)
     
-    # Plot single coordinate plot
-    ggplot(data = filtered_df, aes(x = as.numeric(X), y = as.numeric(Y))) +
-      geom_point(aes(color = as.factor(Best_Pos)), size = 3) +
-      theme_minimal() +
-      theme(legend.position = "none") +
-      labs(title = "Squad Depth") +
-      #geom_text(aes(x = X + x_offset, y = Y + y_offset, label =  truncate_text(gsub("Player ", "", Name))     ), size = input$textSize) +
-      geom_text(aes(
-        x = X + x_offset,
-        y = Y + y_offset,
-        label = label
-      ),
-      size = input$textSize) +
-      ylim(-1, 6) +
-      xlim(-3, 3) +
-      xlab("Touchline") +
-      ylab("Byline") +
-      geom_segment(aes(
-        x = -1,
-        y = -1,
-        xend = 1,
-        yend = -1
-      ), size = 1.5) + # Bottom horizontal
-      geom_segment(aes(
-        x = -1,
-        y = -1,
-        xend = -1,
-        yend = 0
-      ), size = 1.5) + # Left vertical
-      geom_segment(aes(
-        x = 1,
-        y = -1,
-        xend = 1,
-        yend = 0
-      ), size = 1.5) +   # Right vertical
-      labs(
-        title = paste0(
-          "Squad Depth\nMean: ",
-          round(mean_val, 2),
-          " Median: ",
-          round(median_val, 2),
-          " Min: ",
-          min_val,
-          " Max: ",
-          max_val
-        )
-      )
+    
+    if (input$viewType == "2D") {
+      # Plot single coordinate plot
+      ggplot(data = filtered_df, aes(x = as.numeric(X), y = as.numeric(Y))) +
+        geom_point(aes(color = as.factor(Best_Pos)), size = 3) +
+        theme_minimal() +
+        theme(legend.position = "none") +
+        labs(title = "Squad Depth") +
+        #geom_text(aes(x = X + x_offset, y = Y + y_offset, label =  truncate_text(gsub("Player ", "", Name))     ), size = input$textSize) +
+        geom_text(aes(
+          x = X + x_offset,
+          y = Y + y_offset,
+          label = label
+        ),
+        size = input$textSize) +
+        ylim(-1, 6) +
+        xlim(-3, 3) +
+        xlab("Touchline") +
+        ylab("Byline") +
+        geom_segment(aes(
+          x = -1,
+          y = -1,
+          xend = 1,
+          yend = -1
+        ), size = 1.5) + # Bottom horizontal
+        geom_segment(aes(
+          x = -1,
+          y = -1,
+          xend = -1,
+          yend = 0
+        ), size = 1.5) + # Left vertical
+        geom_segment(aes(
+          x = 1,
+          y = -1,
+          xend = 1,
+          yend = 0
+        ), size = 1.5) +   # Right vertical
+        labs(
+          title = paste0(
+            "Squad Depth\nMean: ",
+            round(mean_val, 2),
+            " Median: ",
+            round(median_val, 2),
+            " Min: ",
+            min_val,
+            " Max: ",
+            max_val
+          )
+        ) # Matches labs( title)
+    } else{
+      print("Consult the Plot Viewer for the 3D graph")
+      plot_ly(data = filtered_df) %>%
+        add_trace(
+          x = ~ as.numeric(X),
+          y = ~ as.numeric(Y),
+          z = ~ as.numeric(get(input$attribute)),
+          type = "scatter3d",
+          mode = 'markers+text',
+          marker = list(size = 10),
+          # Adjust size as needed
+          text = ~ paste(
+            "Name: ",
+            gsub("Player ", "", Name),
+            "<br>Value: ",
+            get(input$attribute)
+          ),
+          hoverinfo = "text"
+        ) %>%
+        layout(scene = list(
+          xaxis = list(title = "GoalMouth"),
+          yaxis = list(title = "Byline"),
+          zaxis = list(title = input$attribute)
+        ))
+      
+      
+    }
   })
   
   # Generate plots for each club dynamically
