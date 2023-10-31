@@ -15,6 +15,24 @@ ggplot(data=kawa_data, aes(x=Fla,y=Cmp)) +
   facet_wrap(~Position) +  # Create multiple graphs by position
   geom_text(aes(label=last_names)) # Add a label of last name to ID player
 
+# Use diamonds data set, use fill = cut
+ggplot(data=diamonds) +
+  geom_bar(mapping = aes(x=color, fill=cut)) +
+  facet_wrap(~cut)
+
+# Facet grid for two variables
+# Vertically for 1st variable
+# Horizontally for 2nd variable
+
+ggplot(data = penguins) + 
+  geom_point(mapping=aes(x = flipper_length_mm, y = body_mass_g, color=species)) +
+  facet_grid(sex~species)  
 
 
+ggplot(data = penguins) + 
+  geom_point(mapping=aes(x = flipper_length_mm, y = body_mass_g, color=species)) +
+  facet_grid(~species)  
 
+ggplot(data = penguins) + 
+  geom_point(mapping=aes(x = flipper_length_mm, y = body_mass_g, color=species)) +
+  facet_grid(~sex)  
