@@ -3,6 +3,7 @@ library(ggplot2)
 library(dplyr)
 library(tidyr)
 library(ggrepel)
+library(plotly)
 
 function(input, output, session) {
   # Add truncation function
@@ -162,6 +163,24 @@ function(input, output, session) {
           )
         ) # Matches labs( title)
     } else{
+      # Calculate the mean value for the z-axis
+      mean_val <-
+        mean(as.numeric(filtered_df[[input$attribute]]), na.rm = TRUE)
+      
+      # Create a grid for the surface plane
+      x_range <-
+        seq(min(as.numeric(filtered_df$X)), max(as.numeric(filtered_df$X)), length.out = 10)
+      y_range <-
+        seq(min(as.numeric(filtered_df$Y)), max(as.numeric(filtered_df$Y)), length.out = 10)
+      z_matrix <-
+        matrix(
+          mean_val,
+          nrow = length(x_range),
+          ncol = length(y_range),
+          byrow = TRUE
+        )
+      
+      
       print("Consult the Plot Viewer for the 3D graph")
       plot_ly(data = filtered_df) %>%
         add_trace(
@@ -174,16 +193,42 @@ function(input, output, session) {
           # Adjust size as needed
           text = ~ paste(
             "Name: ",
-            gsub("Player ", "", Name),
+            gsub("Player ", "", last_names),
             "<br>Value: ",
             get(input$attribute)
           ),
           hoverinfo = "text"
         ) %>%
+        # Add the mean value plane
+        add_surface(
+          x = ~ x_range,
+          y = ~ y_range,
+          z = ~ z_matrix,
+          showscale = FALSE,
+          opacity = 0.5,
+          # Set transparency of the plane
+          color = c('rgba(205, 205, 205, 0.5)'),
+          # Set the color of the plane
+          name = "Mean Value Plane"
+        ) %>%
         layout(scene = list(
           xaxis = list(title = "GoalMouth"),
           yaxis = list(title = "Byline"),
-          zaxis = list(title = input$attribute)
+          zaxis = list(title = input$attribute,
+                       range = c(min(
+                         as.numeric(filtered_df[[input$attribute]])
+                       ), max(
+                         as.numeric(filtered_df[[input$attribute]])
+                       ))),
+          annotations = list(
+            x = mean(x_range),
+            y = mean(y_range),
+            z = mean_val,
+            text = paste("Mean:", round(mean_val, 2)),
+            showarrow = FALSE,
+            yanchor = "bottom",
+            xanchor = "center"
+          )
         ))
       
       
