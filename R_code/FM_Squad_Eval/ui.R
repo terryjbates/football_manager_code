@@ -52,7 +52,7 @@ ui <- fluidPage(
         tabPanel("Mean Values", 
                  #div(style = "position:relative; height:calc(100vh - 200px);",
                  div(style = "position:relative; height:calc(100vh- 150px);",
-                     plotOutput("meanValueBarGraph", height = "100%")),
+                     plotlyOutput("meanValueBarGraph", height = "800px")),
                  div(style = "position:relative; width:100%;", 
                      actionButton("toggleOrder", "Toggle Ordering", style = "width:100%;"))
         )

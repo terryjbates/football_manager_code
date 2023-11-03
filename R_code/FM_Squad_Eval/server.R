@@ -520,7 +520,7 @@ function(input, output, session) {
   })
   
   # Mean Value Bar Graph
-  output$meanValueBarGraph <- renderPlot({
+  output$meanValueBarGraph <- renderPlotly({
 
     # Get the mean values of numerical attributes
     numerical_attributes <- data_df %>%
@@ -538,17 +538,17 @@ function(input, output, session) {
     
     # Create the bar chart
     #ggplot(ordered_data, aes(x = reorder(Attribute, if(toggleState()) -MeanValue else MeanValue), y = MeanValue)) +
-    ggplot(ordered_data, aes(x = reorder(Attribute, if(toggleState()) -MeanValue else MeanValue), y = MeanValue, fill= MeanValue)) +
+    #p <- ggplot(ordered_data, aes(x = reorder(Attribute, if(toggleState()) -MeanValue else MeanValue), y = MeanValue, fill= MeanValue)) +
       # geom_bar(stat = "identity", fill = "steelblue") +
+    p <- ggplot(ordered_data, aes(x =  reorder(Attribute, if(toggleState()) -MeanValue else MeanValue), y = MeanValue, fill= MeanValue, text = paste(Attribute, ": ", MeanValue))) +
       geom_bar(stat = "identity") +
-      scale_fill_gradient(low = "red", high="green") +
+      scale_fill_gradient(low = "red", high = "green") +
       theme_minimal() +
       coord_flip() +
-      labs(x = "Attribute", y = "Mean Value") +
-      theme(plot.margin = margin(10, 40, 10, 10)) # Adjust margins if necessary
-  }, height = function() {
-    # Set the height based on the number of bars
-    20 * nrow(data_df)
-
+      labs(x = "Attribute", y = "Mean Value")
+    
+    # Convert to plotly object
+    # Convert to plotly object
+    ggplotly(p, tooltip = "text") %>% layout(margin = list(l = 50, r = 50, b = 100, t = 100, pad = 4))
   })
 }
