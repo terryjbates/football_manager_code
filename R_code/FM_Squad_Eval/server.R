@@ -162,7 +162,7 @@ function(input, output, session) {
             max_val
           )
         ) # Matches labs( title)
-    } else{
+    }  else {
       # Calculate the mean value for the z-axis
       mean_val <-
         mean(as.numeric(filtered_df[[input$attribute]]), na.rm = TRUE)
@@ -180,24 +180,67 @@ function(input, output, session) {
           byrow = TRUE
         )
       
+      # Convert X, Y columns to numeric
+      filtered_df$X <- as.numeric(filtered_df$X)
+      filtered_df$Y <- as.numeric(filtered_df$Y)
+      filtered_df$Z <- as.numeric(filtered_df[[input$attribute]])
       
-      print("Consult the Plot Viewer for the 3D graph")
+      # Calculate label offsets for radial distribution around each point
+      filtered_df <- filtered_df %>%
+        group_by(X, Y, Z) %>% # Group by position
+        mutate(
+          group_id = cur_group_id(),
+          # Assign a group ID for unique grouping
+          num_labels = n(),
+          # Count number of labels per group
+          angle = 2 * pi * (row_number() - 1) / num_labels,
+          # Distribute angles in radians
+          textpos_x = X + 0.1 * cos(angle),
+          # Calculate X offset
+          textpos_y = Y + 0.1 * sin(angle),
+          # Calculate Y offset
+          textpos_z = Z + 0.05 # Offset Z a little bit
+        ) %>%
+        ungroup()
+
+      # Group data by X, Y, and Z, then concatenate the player names and attribute values
+      hover_data <- filtered_df %>%
+        group_by(X, Y, Z) %>%
+        summarise(
+          hover_text = paste("", Name, "Value:", get(input$attribute), collapse = "<br>"),
+          .groups = 'drop' # This drops the grouping
+        )
+      
+      # Join this hover_data back to the filtered_df to have a hover text for each point
+      filtered_df <- filtered_df %>%
+        left_join(hover_data, by = c("X", "Y", "Z"))
+            
+      # Plot the 3D graph
       plot_ly(data = filtered_df) %>%
         add_trace(
-          x = ~ as.numeric(X),
-          y = ~ as.numeric(Y),
-          z = ~ as.numeric(get(input$attribute)),
+          x = ~ X,
+          y = ~ Y,
+          z = ~ Z,
           type = "scatter3d",
-          mode = 'markers+text',
+          mode = 'markers',
           marker = list(size = 10),
-          # Adjust size as needed
+          text = ~hover_text,
+          hoverinfo = "text"
+        ) %>%
+        add_trace(
+          x = ~ textpos_x,
+          y = ~ textpos_y,
+          z = ~ textpos_z,
+          type = "scatter3d",
+          mode = 'text',
           text = ~ paste(
-            "Name: ",
-            gsub("Player ", "", last_names),
-            "<br>Value: ",
+            "",
+            gsub("Player Name", "", Name),
+            ":",
             get(input$attribute)
           ),
-          hoverinfo = "text"
+          hoverinfo = "text",
+          textposition = "top center"
         ) %>%
         # Add the mean value plane
         add_surface(
@@ -206,20 +249,16 @@ function(input, output, session) {
           z = ~ z_matrix,
           showscale = FALSE,
           opacity = 0.5,
-          # Set transparency of the plane
           color = c('rgba(205, 205, 205, 0.5)'),
-          # Set the color of the plane
           name = "Mean Value Plane"
         ) %>%
         layout(scene = list(
           xaxis = list(title = "GoalMouth"),
           yaxis = list(title = "Byline"),
-          zaxis = list(title = input$attribute,
-                       range = c(min(
-                         as.numeric(filtered_df[[input$attribute]])
-                       ), max(
-                         as.numeric(filtered_df[[input$attribute]])
-                       ))),
+          zaxis = list(
+            title = input$attribute,
+            range = c(min(as.numeric(filtered_df[[input$attribute]])), max(as.numeric(filtered_df[[input$attribute]])))
+          ),
           annotations = list(
             x = mean(x_range),
             y = mean(y_range),
@@ -231,8 +270,8 @@ function(input, output, session) {
           )
         ))
       
-      
     }
+    
   })
   
   # Generate plots for each club dynamically
@@ -245,9 +284,9 @@ function(input, output, session) {
         output[[plot_output_id]] <- renderPlot({
           # Get the top n players from this club
           top_n_players_club <-
-            data_df[data_df$Club == club_name,] %>% arrange(desc(get(input$attribute))) %>% head(n = input$n)
+            data_df[data_df$Club == club_name, ] %>% arrange(desc(get(input$attribute))) %>% head(n = input$n)
           club_df <- top_n_players_club
-          club_df <- data_df[data_df$Club == club_name,]
+          club_df <- data_df[data_df$Club == club_name, ]
           
           # Your existing code for the coordinate plot with club_df in place of data_df
           # Merge the map_df with the club_df to get the coordinates
@@ -404,9 +443,9 @@ function(input, output, session) {
     ))
     
     top_players <-
-      head(filtered_df[order(-filtered_df[[input$attribute]]),], n = input$n)
+      head(filtered_df[order(-filtered_df[[input$attribute]]), ], n = input$n)
     ggplot(top_players, aes(x = reorder(
-      gsub("Player ", "", Name),-filtered_df[[input$attribute]]
+      gsub("Player ", "", Name), -filtered_df[[input$attribute]]
     ), y = filtered_df[[input$attribute]])) +
       geom_bar(stat = "identity") +
       theme_minimal() +
