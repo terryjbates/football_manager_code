@@ -457,7 +457,7 @@ function(input, output, session) {
   output$barGraph <- renderPlot({
     selected_classes <- unlist(player_class[input$playerClass])
     filtered_df <- data_df %>%
-      left_join(map_df, by = "Best_Pos") %>%
+      left_join(map_df, by = "Best_Pos", relationship = "many-to-many") %>%
       left_join(player_class_df, by = "Y") %>%
       filter(Class %in% selected_classes)
     
@@ -467,15 +467,25 @@ function(input, output, session) {
       "Please select one or more player classes to view."
     ))
     
-    top_players <-
-      head(filtered_df[order(-filtered_df[[input$attribute]]), ], n = input$n)
-    ggplot(top_players, aes(x = reorder(
-      gsub("Player ", "", Name), -filtered_df[[input$attribute]]
-    ), y = filtered_df[[input$attribute]])) +
+    # Group by the attribute value and concatenate player names with the same value
+    grouped_players <- filtered_df %>%
+      group_by_at(vars(input$attribute)) %>%
+      summarize(Players = paste(Name, collapse = ", "), .groups = 'drop') %>%
+      ungroup() %>%
+      arrange(desc(.data[[input$attribute]]))
+    
+    # Select top n values (not necessarily players because there could be ties)
+    top_values <- head(grouped_players, n = input$n)
+    
+    # Create the bar chart
+    ggplot(top_values, aes_string(x = input$attribute, y = input$attribute)) +
       geom_bar(stat = "identity") +
+      geom_text(aes(label = Players), vjust = -0.5, hjust=0.5) +
       theme_minimal() +
       coord_flip() +
-      labs(y = input$attribute, x = 'Name')
+      labs(y = input$attribute, x = 'Name') +
+      theme(axis.text.y = element_text(hjust = 1))
+
   })
   
   # Histogram

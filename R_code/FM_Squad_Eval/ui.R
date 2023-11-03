@@ -48,7 +48,7 @@ ui <- fluidPage(
       tabPanel("Coordinate Plot", uiOutput("dynamicCoordinatePlots"),
                radioButtons("viewType", "Select View Type:", choices = c("2D", "3D"), selected = "2D")),
       # tabPanel("Scatter Plot", plotOutput("scatterPlot")),
-      # tabPanel("Bar Graph", plotOutput("barGraph")),
+      tabPanel("Bar Graph", plotOutput("barGraph")),
       tabPanel("Histogram", plotOutput("histogramPlot"))
     ))
   )
