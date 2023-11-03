@@ -214,7 +214,17 @@ function(input, output, session) {
       # Join this hover_data back to the filtered_df to have a hover text for each point
       filtered_df <- filtered_df %>%
         left_join(hover_data, by = c("X", "Y", "Z"))
-            
+  
+      # Create a color scale where:
+      #  - Red represents Z values close to 0
+      #  - Green represents Z values higher than the mean value
+      color_scale <- list(
+        c(0, "red"),               # Z = 0
+        c(mean_val / max(filtered_df$Z), "yellow"), # Z = mean_val
+        c(1, "green")              # Z = max
+      )
+      
+                
       # Plot the 3D graph
       plot_ly(data = filtered_df) %>%
         add_trace(
@@ -223,7 +233,22 @@ function(input, output, session) {
           z = ~ Z,
           type = "scatter3d",
           mode = 'markers',
-          marker = list(size = 10),
+          marker = list(
+            size = 10,
+            color = ~Z,             # Color depends on the Z value
+            colorscale = color_scale, # Use the custom color scale
+            colorbar = list(
+              title = "Value",
+              len = 0.5,
+              thinkness = 10,
+              x = 1.02,
+              y = 0.5,
+              titleside = "right",
+              titlefont= list(size=8)
+              ),
+            cmin = 0,              # Minimum value for the color scale
+            cmax = max(filtered_df$Z) # Maximum value for the color scale
+            ),
           text = ~hover_text,
           hoverinfo = "text"
         ) %>%
