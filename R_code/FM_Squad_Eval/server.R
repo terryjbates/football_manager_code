@@ -521,9 +521,21 @@ function(input, output, session) {
   
   # Mean Value Bar Graph
   output$meanValueBarGraph <- renderPlotly({
-
+    # Filter based on selected classes
+    selected_classes <- unlist(player_class[input$playerClass])
+    filtered_df <- data_df %>%
+      left_join(map_df, by = "Best_Pos") %>%
+      left_join(player_class_df, by = "Y") %>%
+      filter(Class %in% selected_classes)
+    
+    # Validate that filtered_df has some rows
+    validate(need(
+      nrow(filtered_df) > 0,
+      "Please select one or more player classes to view."
+    ))
+    
     # Get the mean values of numerical attributes
-    numerical_attributes <- data_df %>%
+    numerical_attributes <- filtered_df %>%
       select_if(is.numeric) %>%
       summarise_all(mean, na.rm = TRUE) %>%
       pivot_longer(everything(), names_to = "Attribute", values_to = "MeanValue")
