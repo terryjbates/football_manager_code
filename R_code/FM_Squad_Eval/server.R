@@ -6,7 +6,17 @@ library(ggrepel)
 library(plotly)
 
 function(input, output, session) {
-  # Add truncation function
+  
+  # Use reactiveVal to keep track of the toggle state
+  toggleState <- reactiveVal(TRUE)
+  
+  # Observe the toggle button and invert the toggle state each time it is pressed
+  observeEvent(input$toggleOrder, {
+    toggleState(!toggleState())
+  })
+  
+  
+    # Add truncation function
   truncate_text <- function(text, maxlen = 8) {
     ifelse(nchar(text) > maxlen, paste0(substr(text, 1, maxlen - 3), "."), text)
   }
@@ -493,7 +503,7 @@ function(input, output, session) {
     # Filter based on selected classes
     selected_classes <- unlist(player_class[input$playerClass])
     filtered_df <- data_df %>%
-      left_join(map_df, by = "Best_Pos") %>%
+      left_join(map_df, by = "Best_Pos", relationship = "many-to-many") %>%
       left_join(player_class_df, by = "Y") %>%
       filter(Class %in% selected_classes)
     
@@ -502,10 +512,43 @@ function(input, output, session) {
       nrow(filtered_df) > 0,
       "Please select one or more player classes to view."
     ))
-    
-    ggplot(filtered_df, aes(x = filtered_df[[input$attribute]])) +
+    # Used to be x = filtered_df
+    ggplot(filtered_df, aes(x = .data[[input$attribute]])) +
       geom_histogram(binwidth = 5) +
       theme_minimal() +
       labs(x = input$attribute)
+  })
+  
+  # Mean Value Bar Graph
+  output$meanValueBarGraph <- renderPlot({
+
+    # Get the mean values of numerical attributes
+    numerical_attributes <- data_df %>%
+      select_if(is.numeric) %>%
+      summarise_all(mean, na.rm = TRUE) %>%
+      pivot_longer(everything(), names_to = "Attribute", values_to = "MeanValue")
+    
+    # Order the data based on the toggle state
+    ordered_data <- if (toggleState()) {
+      numerical_attributes %>% arrange(desc(MeanValue))
+    } else {
+      numerical_attributes %>% arrange(Attribute)
+    }
+    
+    
+    # Create the bar chart
+    #ggplot(ordered_data, aes(x = reorder(Attribute, if(toggleState()) -MeanValue else MeanValue), y = MeanValue)) +
+    ggplot(ordered_data, aes(x = reorder(Attribute, if(toggleState()) -MeanValue else MeanValue), y = MeanValue, fill= MeanValue)) +
+      # geom_bar(stat = "identity", fill = "steelblue") +
+      geom_bar(stat = "identity") +
+      scale_fill_gradient(low = "red", high="green") +
+      theme_minimal() +
+      coord_flip() +
+      labs(x = "Attribute", y = "Mean Value") +
+      theme(plot.margin = margin(10, 40, 10, 10)) # Adjust margins if necessary
+  }, height = function() {
+    # Set the height based on the number of bars
+    20 * nrow(data_df)
+
   })
 }
