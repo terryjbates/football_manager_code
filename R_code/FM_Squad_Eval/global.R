@@ -6,6 +6,26 @@ data_df <-
 # Create LastName to create LastName label option
 data_df$LastName <- sapply(strsplit(data_df$Name, " "), tail, 1)
 
+
+# Try to sort attributes lexicographically
+data_df_colnames <- colnames(data_df)
+data_df_colnames <- sort(data_df_colnames)
+
+# Create new data frame, same size as data_df
+new_df <- data.frame(matrix(ncol = ncol(data_df), nrow = nrow(data_df)))
+
+# We use the sorted column names
+colnames(new_df) <- data_df_colnames
+
+# Copy the data from original unsorted data_df into new_df
+for (col in names(data_df)) {
+  new_df[[col]] <- data_df[[col]]
+}
+
+# Set data_df to be new_df
+data_df <- new_df
+
+
 # Position mapping
 position_mapping_default <- list(
   `0,0` = c("GK"),
