@@ -547,11 +547,7 @@ function(input, output, session) {
       numerical_attributes %>% arrange(Attribute)
     }
     
-    
     # Create the bar chart
-    #ggplot(ordered_data, aes(x = reorder(Attribute, if(toggleState()) -MeanValue else MeanValue), y = MeanValue)) +
-    #p <- ggplot(ordered_data, aes(x = reorder(Attribute, if(toggleState()) -MeanValue else MeanValue), y = MeanValue, fill= MeanValue)) +
-      # geom_bar(stat = "identity", fill = "steelblue") +
     p <- ggplot(ordered_data, aes(x =  reorder(Attribute, if(toggleState()) -MeanValue else MeanValue), y = MeanValue, fill= MeanValue, text = paste(Attribute, ": ", MeanValue))) +
       geom_bar(stat = "identity") +
       scale_fill_gradient(low = "red", high = "green") +
@@ -559,7 +555,6 @@ function(input, output, session) {
       coord_flip() +
       labs(x = "Attribute", y = "Mean Value")
     
-    # Convert to plotly object
     # Convert to plotly object
     ggplotly(p, tooltip = "text") %>% layout(margin = list(l = 50, r = 50, b = 100, t = 100, pad = 4))
   })
