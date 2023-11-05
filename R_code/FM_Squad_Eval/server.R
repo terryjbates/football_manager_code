@@ -143,18 +143,12 @@ function(input, output, session) {
     
     if (input$viewType == "2D") {
       # Plot single coordinate plot
-      ggplot(data = filtered_df, aes(x = as.numeric(X), y = as.numeric(Y))) +
+      p <- ggplot(data = filtered_df, aes(x = as.numeric(X), y = as.numeric(Y))) +
         geom_point(aes(color = as.factor(Best_Pos)), size = 3) +
         theme_minimal() +
         theme(legend.position = "none") +
         labs(title = "Squad Depth") +
         #geom_text(aes(x = X + x_offset, y = Y + y_offset, label =  truncate_text(gsub("Player ", "", Name))     ), size = input$textSize) +
-        geom_text(aes(
-          x = X + x_offset,
-          y = Y + y_offset,
-          label = label
-        ),
-        size = input$textSize) +
         ylim(-1, 6) +
         xlim(-3, 3) +
         xlab("Touchline") +
@@ -189,6 +183,17 @@ function(input, output, session) {
             max_val
           )
         ) # Matches labs( title)
+      # Conditionally add the text labels
+      if (input$show_names) {
+        p <- p +  geom_text(aes(
+          x = X + x_offset,
+          y = Y + y_offset,
+          label = label
+          ),
+          size = input$textSize)
+      }
+      
+      p # Return the plot
     }  else {
       # Calculate the mean value for the z-axis
       mean_val <-
@@ -321,7 +326,6 @@ function(input, output, session) {
             xanchor = "center"
           )
         ))
-      
     }
     
   })
