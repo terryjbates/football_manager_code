@@ -64,6 +64,8 @@ function(input, output, session) {
     }
     
   })
+
+# Single Coord Plot -------------------------------------------------------
   
   # Create a reactive expression for the coordinate plot
   output$coordinatePlot <- renderPlot({
@@ -308,6 +310,9 @@ function(input, output, session) {
     }
     
   })
+
+# Coord plots for multiple clubs ------------------------------------------
+
   
   # Generate plots for each club dynamically
   observe({
@@ -436,6 +441,9 @@ function(input, output, session) {
     }
     
   })
+
+# ScatterPlot -------------------------------------------------------------
+
   
   # Scatter Plot
   output$scatterPlot <- renderPlot({
@@ -462,6 +470,9 @@ function(input, output, session) {
       ) +
       labs(color = input$attribute)
   })
+
+# BarGraph ----------------------------------------------------------------
+
   
   # Bar Graph
   output$barGraph <- renderPlot({
@@ -480,8 +491,18 @@ function(input, output, session) {
     # Group by the attribute value and concatenate player names with the same value
     grouped_players <- filtered_df %>%
       group_by_at(vars(input$attribute)) %>%
+      # browser()
+      #distinct(Players) %>%
       summarize(Players = paste(Name, collapse = ", "), .groups = 'drop') %>%
       ungroup() %>%
+      rowwise() %>% # apply the function to each row independently
+      mutate(
+        Players = paste(
+          unique(trimws(unlist(strsplit(Players, ",")))), 
+          collapse = ", "
+        )
+      ) %>%
+      ungroup() %>% # to reset the grouping
       arrange(desc(.data[[input$attribute]]))
     
     # Select top n values (not necessarily players because there could be ties)
@@ -497,6 +518,9 @@ function(input, output, session) {
       theme(axis.text.y = element_text(hjust = 1))
 
   })
+
+# Histogram ---------------------------------------------------------------
+
   
   # Histogram
   output$histogramPlot <- renderPlot({
@@ -518,6 +542,9 @@ function(input, output, session) {
       theme_minimal() +
       labs(x = input$attribute)
   })
+
+# Mean Values Bar Graph ---------------------------------------------------
+
   
   # Mean Value Bar Graph
   output$meanValueBarGraph <- renderPlotly({
