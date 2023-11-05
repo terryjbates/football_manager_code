@@ -258,7 +258,7 @@ function(input, output, session) {
       
                 
       # Plot the 3D graph
-      plot_ly(data = filtered_df) %>%
+      p <- plot_ly(data = filtered_df) %>%
         add_trace(
           x = ~ X,
           y = ~ Y,
@@ -313,7 +313,6 @@ function(input, output, session) {
           xaxis = list(title = "GoalMouth"),
           yaxis = list(title = "Byline"),
           zaxis = list(
-            title = input$attribute,
             range = c(min(as.numeric(filtered_df[[input$attribute]])), max(as.numeric(filtered_df[[input$attribute]])))
           ),
           annotations = list(
@@ -326,6 +325,11 @@ function(input, output, session) {
             xanchor = "center"
           )
         ))
+      p <- p %>% layout(title = list(text = paste("3D plot for: ", input$attribute),
+                        x=0.2,
+                        y = 0.95)
+                        )
+      p
     }
     
   })
