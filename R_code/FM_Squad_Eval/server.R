@@ -563,7 +563,7 @@ function(input, output, session) {
                    MeanValue),
                y = MeanValue,
                fill = MeanValue,
-               text = paste(Attribute, ": ", MeanValue)
+               text = paste("<b>", Attribute, "</b>",  ": ", MeanValue)
              )) +
       geom_bar(stat = "identity") +
       scale_fill_gradient(low = "red", high = "green") +
