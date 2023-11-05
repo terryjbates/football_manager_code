@@ -524,7 +524,7 @@ function(input, output, session) {
     # Filter based on selected classes
     selected_classes <- unlist(player_class[input$playerClass])
     filtered_df <- data_df %>%
-      left_join(map_df, by = "Best_Pos") %>%
+      left_join(map_df, by = "Best_Pos", relationship = "many-to-many") %>%
       left_join(player_class_df, by = "Y") %>%
       filter(Class %in% selected_classes)
     

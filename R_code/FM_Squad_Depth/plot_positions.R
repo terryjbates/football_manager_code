@@ -98,7 +98,7 @@ plot_positions <- function(data_df, position_mapping = position_mapping_default)
   plot <- ggplot(data = merged_df, aes(x = X, y = Y)) +
     
     # For the heatmap
-    geom_bin2d(aes(fill = ..count..), bins = 30) + 
+    geom_bin2d(aes(fill = after_stat(count)), bins = 30) + 
     
     # Points for each position
     geom_point(aes(color = Best_Pos), size = 3) + 
