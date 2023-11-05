@@ -540,15 +540,31 @@ function(input, output, session) {
       summarise_all(mean, na.rm = TRUE) %>%
       pivot_longer(everything(), names_to = "Attribute", values_to = "MeanValue")
     
+    numerical_attributes$Attribute <-
+      factor(numerical_attributes$Attribute, levels = rev(unique(numerical_attributes$Attribute)))
+    
+    
     # Order the data based on the toggle state
     ordered_data <- if (toggleState()) {
-      numerical_attributes %>% arrange(desc(MeanValue))
+      numerical_attributes %>% arrange(MeanValue)
     } else {
-      numerical_attributes %>% arrange(Attribute)
+      numerical_attributes %>% arrange(desc(Attribute))
     }
     
+    # Debug line
+    # browser()
     # Create the bar chart
-    p <- ggplot(ordered_data, aes(x =  reorder(Attribute, if(toggleState()) -MeanValue else MeanValue), y = MeanValue, fill= MeanValue, text = paste(Attribute, ": ", MeanValue))) +
+    p <-
+      ggplot(ordered_data,
+             aes(
+               x =  reorder(Attribute, if (toggleState())
+                 Attribute
+                 else
+                   MeanValue),
+               y = MeanValue,
+               fill = MeanValue,
+               text = paste(Attribute, ": ", MeanValue)
+             )) +
       geom_bar(stat = "identity") +
       scale_fill_gradient(low = "red", high = "green") +
       theme_minimal() +
