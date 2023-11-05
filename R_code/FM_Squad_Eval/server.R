@@ -560,7 +560,17 @@ function(input, output, session) {
       nrow(filtered_df) > 0,
       "Please select one or more player classes to view."
     ))
-    
+    #browser()
+    # Don't show GK-related attributes if Goalkeeper unselected
+    if (!("Goalkeepers" %in% selected_classes)){
+      # See if any GK attribs exist, if so, reduce working set
+      cols_to_remove_exist <- intersect(gk_attribs, colnames(filtered_df))
+      # Barely understand this code. 
+      # See https://stackoverflow.com/questions/6286313/remove-an-entire-column-from-a-data-frame-in-r
+      filtered_df <- filtered_df[,!colnames(filtered_df) %in% cols_to_remove_exist]
+      #browser()
+    } 
+    #browser()
     # Get the mean values of numerical attributes
     numerical_attributes <- filtered_df %>%
       select_if(is.numeric) %>%
@@ -577,7 +587,7 @@ function(input, output, session) {
     } else {
       numerical_attributes %>% arrange(desc(Attribute))
     }
-    
+        
     # Debug line
     # browser()
     # Create the bar chart

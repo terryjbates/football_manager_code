@@ -25,6 +25,11 @@ for (col in names(data_df)) {
 # Set data_df to be new_df
 data_df <- new_df
 
+# Goalkeeper attribs for removal
+
+gk_attribs <- c("Kic","Ref", "Han", "Aer", "Com","Cmd", "1v1", "Thr", "Agi", "Ecc",
+                "Pun", "Tro","X1v1", "TRO" )
+#gk_attribs <- c('Kic', 'Pun')
 
 # Position mapping
 position_mapping_default <- list(
