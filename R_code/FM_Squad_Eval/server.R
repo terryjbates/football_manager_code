@@ -587,7 +587,14 @@ function(input, output, session) {
     } else {
       numerical_attributes %>% arrange(desc(Attribute))
     }
-        
+    
+    x_values_to_highlight <- "Foobar"
+    # Create a vector of x values to highlight
+    if (length(selected_classes) == 1){
+      single_player_class_name <- selected_classes[[1]]
+      x_values_to_highlight <- class_attrib_lookup[[single_player_class_name]]
+      #browser()
+    }    
     # Debug line
     # browser()
     # Create the bar chart
@@ -602,7 +609,14 @@ function(input, output, session) {
                fill = MeanValue,
                text = paste("<b>", Attribute, "</b>",  ": ", MeanValue)
              )) +
-      geom_bar(stat = "identity") +
+      geom_bar(stat = "identity",
+               color = ifelse(
+                 ordered_data$Attribute %in% x_values_to_highlight,
+                 "darkblue",
+                 "black"
+               ),
+               size = ifelse(ordered_data$Attribute %in% x_values_to_highlight, 1, 0)
+               ) +
       scale_fill_gradient(low = "red", high = "green") +
       theme_minimal() +
       coord_flip() +

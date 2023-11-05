@@ -31,6 +31,27 @@ gk_attribs <- c("Kic","Ref", "Han", "Aer", "Com","Cmd", "1v1", "Thr", "Agi", "Ec
                 "Pun", "Tro","X1v1", "TRO" )
 #gk_attribs <- c('Kic', 'Pun')
 
+
+#Defenders <- c("Hea", "Mar", "Tck", "Pos", "Jmp", "Str")
+
+class_attrib_lookup <- list(Defenders = c("Hea", "Mar", "Tck", "Pos", "Jum", "Str"),
+                            Goalkeepers = c("Kic","Ref", "Han", "Aer", "Com","Cmd", 
+                                            "1v1", "Thr", "Agi", "Ecc", "Pun", 
+                                            "Tro","X1v1", "TRO" ),
+                            "Central Midfielders" = c("Pas", "Tck", "OtB", "Tea",
+                                                      "Wor", "Sta"),
+                            "Defensive Midfielders"= c("Tck","Ant", "Cnt", "Pos",
+                                                       "Tea","Fir","Tec","Cmp",
+                                                       "Vis", "Pas"),
+                            "Central Midfielders" = c("Fir", "Pas", "Tck", "Dec",
+                                                      "Tea"),
+                            "Attacking Midfielders" = c("Fir", "Pas", "Dec", "Tec",
+                                                        "Cmp", "Dec", "OtB", "Tea",
+                                                        "Vis","Fla"),
+                            Forwards = c("Dri", "Fin", "Fir", "Tec", "Cmp",
+                                         "OtB", "Cmp", "Acc", "Pac")
+                            )
+
 # Position mapping
 position_mapping_default <- list(
   `0,0` = c("GK"),
