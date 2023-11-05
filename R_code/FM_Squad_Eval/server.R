@@ -4,17 +4,32 @@ library(dplyr)
 library(tidyr)
 library(ggrepel)
 library(plotly)
+source('./global.R')
 
 function(input, output, session) {
   
   # Use reactiveVal to keep track of the toggle state
   toggleState <- reactiveVal(TRUE)
   
+  
   # Observe the toggle button and invert the toggle state each time it is pressed
   observeEvent(input$toggleOrder, {
     toggleState(!toggleState())
   })
+
+  # Observe event for selectAll button
+  observeEvent(input$selectAll, {
+    # Check if any classes are not selected
+    if(setequal(input$playerClass, names(player_class))) {
+      # All classes are selected, so we deselect all
+      updateCheckboxGroupInput(session, "playerClass", selected = character(0))
+    } else {
+      # Not all classes are selected, so we select all
+      updateCheckboxGroupInput(session, "playerClass", selected = names(player_class))
+    }
+  })
   
+  #browser()
   
     # Add truncation function
   truncate_text <- function(text, maxlen = 8) {

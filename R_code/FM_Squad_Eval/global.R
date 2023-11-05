@@ -91,6 +91,16 @@ player_class <- list(
 )
 
 
+# Store the choices for player classes statically to ensure consistency
+player_class_choices <- c(
+  "Goalkeepers" = "0",
+  "Defenders" = "1",
+  "Defensive Midfielders" = "2",
+  "Central Midfielders" = "3",
+  "Attacking Midfielders" = "4",
+  "Forwards" = "5"
+)
+
 # Sample data
 #data_df <- data.frame(
 #  Name = c("Player Abacus", "Player Bolshivek", "Player Comrade", "Player Druze", "Player Erroll"),

@@ -32,16 +32,11 @@ ui <- fluidPage(
       checkboxGroupInput(
         "playerClass",
         label = "Select player classes to view",
-        choices = c(
-          "Goalkeepers" = 0,
-          "Defenders" = 1,
-          "Defensive Midfielders" = 2,
-          "Central Midfielders" = 3,
-          "Attacking Midfielders" = 4,
-          "Forwards" = 5
-        ),
-        selected = 0:5
-      )
+        choices = player_class_choices,
+        selected = names(player_class_choices)
+      ),
+      # Button for select/deselect all
+      actionButton("selectAll", "Select All / Deselect All")
     ),
     
     mainPanel(
