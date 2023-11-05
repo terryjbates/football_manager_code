@@ -4,8 +4,8 @@ library(rvest)
 library(dplyr)
 library(ggplot2)
 
-source('expand_positions.R')
-source('plot_positions.R')
+source('./expand_positions.R')
+source('./plot_positions.R')
 # Read the HTML file
 html_file <- "sample.html"
 webpage <- read_html(html_file)
