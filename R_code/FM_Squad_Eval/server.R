@@ -524,14 +524,18 @@ function(input, output, session) {
     top_values <- head(grouped_players, n = input$n)
     
     # Create the bar chart
-    ggplot(top_values, aes_string(x = input$attribute, y = input$attribute)) +
+    gg <-ggplot(top_values, aes_string(x = input$attribute, y = input$attribute)) +
       geom_bar(stat = "identity") +
-      geom_text(aes(label = Players), vjust = -0.5, hjust=0.5) +
       theme_minimal() +
       coord_flip() +
       labs(y = input$attribute, x = 'Name') +
       theme(axis.text.y = element_text(hjust = 1))
-
+    # Add labels conditionally based on the 'Show Player Names' checkbox
+    if (input$show_names) {
+      gg <- gg + geom_text(aes(label = Players), vjust = -0.5, hjust=0.5)
+    }
+    gg
+    
   })
 
 # Histogram ---------------------------------------------------------------
