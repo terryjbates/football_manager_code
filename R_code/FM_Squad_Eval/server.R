@@ -4,6 +4,9 @@ library(dplyr)
 library(tidyr)
 library(ggrepel)
 library(plotly)
+library(gridExtra)
+#library(ggpubr)
+
 source('./global.R')
 
 function(input, output, session) {
@@ -532,7 +535,7 @@ function(input, output, session) {
     top_values <- head(grouped_players, n = input$n)
     
     # Create the bar chart
-    gg <-ggplot(top_values, aes_string(x = input$attribute, y = input$attribute)) +
+    gg <-ggplot(top_values, aes(x = input$attribute, y = input$attribute)) +
       geom_bar(stat = "identity") +
       theme_minimal() +
       coord_flip() +
@@ -615,7 +618,9 @@ function(input, output, session) {
       numerical_attributes %>% arrange(desc(Attribute))
     }
     
-    x_values_to_highlight <- "Foobar"
+    # Test value to try
+    x_values_to_highlight <- NULL
+    
     # Create a vector of x values to highlight
     if (length(selected_classes) == 1){
       single_player_class_name <- selected_classes[[1]]
@@ -624,6 +629,19 @@ function(input, output, session) {
     }    
     # Debug line
     # browser()
+    
+    # Suggest tactical style
+    #browser()    
+    
+    # Obtain style
+    suggested_tactical_style <-  suggest_tactical_style(ordered_data)
+    suggested_tactic_df <- as.data.frame(do.call(rbind, 
+                                                 suggested_tactical_style))
+    #suggested_tactic_table <- tableGrob(suggested_tactic_df)
+    #browser()
+    # print(suggested_tactical_style)
+    #browser()
+    
     # Create the bar chart
     p <-
       ggplot(ordered_data,
@@ -647,9 +665,33 @@ function(input, output, session) {
       scale_fill_gradient(low = "red", high = "green") +
       theme_minimal() +
       coord_flip() +
-      labs(x = "Attribute", y = "Mean Value")
+      labs(x = "Attribute", y = "Mean Value") 
+    
+    
+    # Adding the text label for tactical styles and formations
+    # We use the tail of the ordered_data for positioning since it's a flipped coordinate system
+
+    tactic_text <- paste(suggested_tactic_df$Style, 
+                         suggested_tactic_df$Formations, 
+                         sep = ": ", collapse = "\n")
+    
+    
+    # Adding a label with the tactics information
+    p <- p + geom_text(x = max(ordered_data$MeanValue) * 1.1, 
+                       y = max(ordered_data$MeanValue), 
+                       label = tactic_text, 
+                       hjust = 1, 
+                       vjust = 1,
+                       size = 3)
     
     # Convert to plotly object
-    ggplotly(p, tooltip = "text") %>% layout(margin = list(l = 50, r = 50, b = 100, t = 100, pad = 4))
+    ggplotly(p, tooltip = "text") %>%
+      layout(margin = list(
+        l = 50,
+        r = 50,
+        b = 100,
+        t = 100,
+        pad = 4
+      ))
   })
 }
