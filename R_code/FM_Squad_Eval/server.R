@@ -671,18 +671,53 @@ function(input, output, session) {
     # Adding the text label for tactical styles and formations
     # We use the tail of the ordered_data for positioning since it's a flipped coordinate system
 
-    tactic_text <- paste(suggested_tactic_df$Style, 
-                         suggested_tactic_df$Formations, 
-                         sep = ": ", collapse = "\n")
+    tactic_text <- paste(
+      paste0("<b>", suggested_tactic_df$Style, "</b>"), 
+      suggested_tactic_df$Formations, 
+      sep = ": ", collapse = "\n"
+    )
+    
+    # Add some space for the annotation on the right side of the plot
+    p <- p + theme(plot.margin = unit(c(1, 8, 1, 1), "lines"))
+    
+    # # Adding a label with the tactics information
+    # p <- p + annotate("text", x = Inf, y = Inf, label = tactic_text, 
+    #                   hjust = 1, vjust = 1, size = 3.5, 
+    #                   color = "black", fontface = "italic",
+    #                   position = position_nudge(y = 0.5)) # Nudge to move it up a bit
+
+    # Failed attempt centered text
+    # Calculate the center of the plot
+    # center_x <- median(ordered_data$MeanValue)
+    # center_y <- median(as.numeric(factor(ordered_data$Attribute)))
+    # 
+    # # Add the annotation for centered text
+    # p <- p + annotate("text", x = center_x, y = center_y, label = "Centered Text", 
+    #                   hjust = 0.5, vjust = 0.5, size = 5, color = "black", fontface = "bold")
+    # 
     
     
+    
+    # Find the range of the data
+    x_range <- range(as.numeric(factor(ordered_data$Attribute)))
+    y_range <- range(ordered_data$MeanValue)
+    
+    # Calculate the center of the plot with flipped coordinates
+    center_x <- mean(x_range)
+    center_y <- mean(y_range)
+    
+    # Add the annotation for centered text
+    #p <- p + annotate("text", x = center_x, y = center_y, label = "Centered Text", 
+    #                  hjust = 0.5, vjust = 0.5, size = 5, color = "black", fontface = "bold")
+    
+    print(center_x)
+    print(center_y)
     # Adding a label with the tactics information
-    p <- p + geom_text(x = max(ordered_data$MeanValue) * 1.1, 
-                       y = max(ordered_data$MeanValue), 
-                       label = tactic_text, 
-                       hjust = 1, 
-                       vjust = 1,
-                       size = 3)
+    p <- p + annotate("text", x = center_x - 15, y = center_y + 3, label = tactic_text, 
+                      hjust = 0.75, vjust = 0.25, size = 2.5, 
+                      color = "black", fontface = "italic",
+                      position = position_nudge(y = 0.5)) # Nudge to move it up a bit
+    
     
     # Convert to plotly object
     ggplotly(p, tooltip = "text") %>%
