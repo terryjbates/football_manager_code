@@ -36,7 +36,7 @@ ui <- fluidPage(
         selected = names(player_class_choices)
       ),
       # Button for select/deselect all
-      actionButton("selectAll", "Select All / Deselect All")
+      actionButton("selectAll", "Select / Deselect All")
     ),
     
     mainPanel(
