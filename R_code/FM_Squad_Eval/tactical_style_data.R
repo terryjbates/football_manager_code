@@ -22,7 +22,15 @@ suggest_tactical_style <- function(input_data) {
   # Calculate match scores for each tactical style
   scores <- sapply(tactical_styles_df$Style, function(style) {
     style_row <- tactical_styles_df[tactical_styles_df$Style == style, -ncol(tactical_styles_df)]
-    sum(input_data$MeanValue * style_row[match(input_data$Style, names(style_row))])
+    matched_indices <- match(input_data$Style, names(style_row))
+    # Filter out NA values which indicate unmatched attributes
+    matched_indices <- matched_indices[!is.na(matched_indices)]
+    if(length(matched_indices) == 0) {
+      # If no attributes match, return 0 or some other indicator of no match
+      return(0)
+    }
+    # Only calculate scores for matched attributes
+    sum(input_data$MeanValue[matched_indices] * style_row[matched_indices])
   })
   
   # Get the top 3 matches
