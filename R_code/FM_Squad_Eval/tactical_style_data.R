@@ -16,6 +16,12 @@ suggest_tactical_style <- function(input_data) {
   # Ensure that input is a data frame for easier manipulation
   input_data <- as.data.frame(input_data)
   
+  # Sort input data by MeanValue in descending order
+  input_data <- input_data[order(-input_data$MeanValue), ]
+  
+  # Filter to top 25%
+  input_data <- head(input_data, ceiling(nrow(input_data) * 0.25))
+  
   # Normalize input to match the CSV format
   colnames(input_data)[colnames(input_data) == "Attribute"] <- "Style"
   
