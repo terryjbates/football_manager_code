@@ -2,7 +2,7 @@
 source("./tactical_style_data.R")
 
 # Read in tactical styles
-tactical_styles <- read_tactical_styles("./tactical_style_weightings.csv")
+#tactical_styles <- read_tactical_styles("./tactical_style_weightings.csv")
 
 # "Real" FM data read from disk. See bottom for previous data_df.
 
