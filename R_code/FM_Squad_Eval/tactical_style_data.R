@@ -1,11 +1,14 @@
 library(dplyr)
 library(readr)
 library(purrr)
+library(data.table)
 
 
 suggest_tactical_style <- function(input_data) {
   # Load the tactical styles data
   tactical_styles_df <- read_csv("tactical_style_weightings.csv", show_col_types = FALSE)
+  
+  print(input_data)
   
   # Check for correct input type and columns
   if (!(is.data.frame(input_data) || is.list(input_data) || is_tibble(input_data)) ||
@@ -19,11 +22,16 @@ suggest_tactical_style <- function(input_data) {
   # Sort input data by MeanValue in descending order
   input_data <- input_data[order(-input_data$MeanValue), ]
   
+  # Remove 'Age' column
+  #input_data <- subset(input_data, select = -'Age')
+  
   # Filter to top 25%
-  input_data <- head(input_data, ceiling(nrow(input_data) * 0.25))
+  input_data <- head(input_data, ceiling(nrow(input_data) * 0.50))
   
   # Normalize input to match the CSV format
   colnames(input_data)[colnames(input_data) == "Attribute"] <- "Style"
+  
+  
   
   # Calculate match scores for each tactical style
   scores <- sapply(tactical_styles_df$Style, function(style) {
