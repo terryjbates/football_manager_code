@@ -118,7 +118,7 @@ function(input, output, session) {
     # Create a label for each player with their last name and the selected attribute
     selected_attribute <- filtered_df[[input$attribute]]
     filtered_df$label <-
-      paste0(last_names, "\n", selected_attribute)
+      paste0(last_names, "\n", round(selected_attribute, 2))
     
     # Convert X and Y columns to numeric
     filtered_df$X <- as.numeric(filtered_df$X)
@@ -181,9 +181,9 @@ function(input, output, session) {
             " Median: ",
             round(median_val, 2),
             " Min: ",
-            min_val,
+            round(min_val, 2),
             " Max: ",
-            max_val
+            round(max_val, 2)
           )
         ) # Matches labs( title)
       # Conditionally add the text labels
@@ -598,9 +598,11 @@ function(input, output, session) {
       # Barely understand this code. 
       # See https://stackoverflow.com/questions/6286313/remove-an-entire-column-from-a-data-frame-in-r
       filtered_df <- filtered_df[,!colnames(filtered_df) %in% cols_to_remove_exist]
-      #browser()
     } 
-    #browser()
+
+    #Remove 'Age' from plot for weirdness
+    filtered_df <- filtered_df[,!colnames(filtered_df) %in% c('Age')]
+    
     # Get the mean values of numerical attributes
     numerical_attributes <- filtered_df %>%
       select_if(is.numeric) %>%
