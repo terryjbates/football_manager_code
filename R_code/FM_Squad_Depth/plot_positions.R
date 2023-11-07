@@ -11,17 +11,17 @@ position_mapping_default <- list(
   `1,1` = c("D (C)"),
   `2,1` = c("D (R)", "D/WB (R)"),
   
-  `-2,2` = c("D/WB (L)"),
+  `-2,2` = c("D/WB (L)", "WB (L)"),
   `-1,2` = c("DM"),
   `0,2` = c("DM"),
   `1,2` = c("DM"),
-  `2,2` = c("D/WB (R)"),
+  `2,2` = c("D/WB (R)", "WB (R)"),
   
-  `-2,3` = c("M/AM (L)"),
+  `-2,3` = c("M/AM (L)", "M (L)"),
   `-1,3` = c("M (C)"),
   `0,3` = c("M (C)"),
   `1,3` = c("M (C)"),
-  `2,3` = c("M/AM (R)"),
+  `2,3` = c("M/AM (R)", "M (R)"),
   
   `-2,4` = c("M/AM (L)", "AM (L)"),
   `-1,4` = c("AM (C)"),
@@ -96,30 +96,29 @@ plot_positions <- function(data_df, position_mapping = position_mapping_default)
   
      
   plot <- ggplot(data = merged_df, aes(x = X, y = Y)) +
+
+    # Points for each position
+    geom_point(aes(color = Best_Pos), size = 3) +
     
     # For the heatmap
-    geom_bin2d(aes(fill = after_stat(count)), bins = 30) + 
-    
-    # Points for each position
-    geom_point(aes(color = Best_Pos), size = 3) + 
-    
+    geom_bin2d(aes(fill = after_stat(count)), bins = 30) +
+
     # Position label below the point
     geom_text(aes(label = Best_Pos), size = 2.5, vjust = 2.5, hjust = 0.5) +
-    
+
     # Jitter the player names around their Best_Pos
     #geom_text(aes(label = Name), position = position_jitter(width = 0.3, height = 0.3), size = 2.5, alpha = 0.7) +
     #geom_text(aes(label = LastName), position = position_jitter(width = 0.3, height = 0.3), size = 2.5, alpha = 0.7) +
-    
+
     # Place the player last names radially around their Best_Pos
     geom_text(aes(x = label_x, y = label_y, label = LastName), size = 2.5, alpha = 0.7) +
-    
-    
+
     # Count of players at each position using counts_df
     geom_text(data = counts_df, aes(label = count), vjust = -1, hjust = 0.5, size = 2.5, color = "black") +
-    
+
     # Adjusted gradient scale for clarity
     scale_fill_gradient(name = "Number of Players", low = "red", high = "green") +
-    
+
     theme_minimal() +
     labs(title = "Squad Depth") +
     
