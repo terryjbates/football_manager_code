@@ -6,8 +6,12 @@ library(ggplot2)
 
 source('./expand_positions.R')
 source('./plot_positions.R')
+
+
 # Read the HTML file
-html_file <- "sample.html"
+#html_file <- "sample.html"
+#html_file <- "initial_kofu_squad.html"
+html_file <- "test.html"
 webpage <- read_html(html_file)
 
 # Extract the table
@@ -16,17 +20,21 @@ player_table <- html_nodes(webpage, "table") %>% html_table(fill = TRUE)
 # Convert the table to a data frame
 player_data <- player_table[[1]]
 
-# Change `Best Pos` to Best_Pos 
-player_data <- player_data %>% mutate(Best_Pos = `Best Pos`)
+# Remove duplicate columns
+player_data <- player_data[!duplicated(colnames(player_data))]
+
+# Attempts to change `Best Pos` to Best_Pos 
+#player_data <- player_data %>% mutate(Best_Pos = `Best Pos`)
+player_data$Best_Pos <- player_data$`Best Pos`
   
 # Create expanded dataframe. Preserves current values and generates
 # added elements to data frame with unique `Best Pos`
 expanded_df <- expand_positions(player_data)
 
 # Plot the grid with squad depth
-plot_positions(expanded_df)
+our_plot <- plot_positions(expanded_df)
 
-
+our_plot
 
 # Test  data
 #player_data <- data.frame(
