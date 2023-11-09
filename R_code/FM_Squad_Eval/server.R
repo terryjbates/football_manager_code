@@ -154,24 +154,24 @@ function(input, output, session) {
         #geom_text(aes(x = X + x_offset, y = Y + y_offset, label =  truncate_text(gsub("Player ", "", Name))     ), size = input$textSize) +
         ylim(-1, 6) +
         xlim(-3, 3) +
-        xlab("Touchline") +
+        xlab("Home Goal") +
         ylab("Byline") +
         geom_segment(aes(
-          x = -1,
-          y = -1,
-          xend = 1,
-          yend = -1
+          x = -0.5,
+          y = -0.5,
+          xend = 0.5,
+          yend = -0.5
         ), size = 1.5) + # Bottom horizontal
         geom_segment(aes(
-          x = -1,
-          y = -1,
-          xend = -1,
+          x = -0.5,
+          y = -0.5,
+          xend = -0.5,
           yend = 0
         ), size = 1.5) + # Left vertical
         geom_segment(aes(
-          x = 1,
-          y = -1,
-          xend = 1,
+          x = 0.5,
+          y = -0.5,
+          xend = 0.5,
           yend = 0
         ), size = 1.5) +   # Right vertical
         labs(
