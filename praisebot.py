@@ -86,7 +86,11 @@ def orientate():
     time.sleep(2)
     my_move(INDY_TRAINING_AREA)
     my_click()
-
+    
+    # Click first player
+    my_move(TOP_PLAYER_AREA)
+    my_click()
+    
 
 # To display mouse position
 # pyautogui.displayMousePosition()
@@ -125,11 +129,6 @@ if __name__ == "__main__":
     # Go to Training>Indivdual menus
     orientate()
 
-    # Set first position on first player and mouse click
-    # first_player_button = (1267, 385)
-    my_move(TOP_PLAYER_AREA)
-    my_click()
-
     # Take a screenshot of the specified region
     screenshot = pyautogui.screenshot(region=region)
     screenshot = np.array(screenshot)
@@ -155,7 +154,7 @@ if __name__ == "__main__":
     grouped_locations = group_locations(locations)
     
     # Pretty print locations detected
-    pprint.pprint(locations)
+    #pprint.pprint(locations)
     
     # Process each matching location
     i = 0
