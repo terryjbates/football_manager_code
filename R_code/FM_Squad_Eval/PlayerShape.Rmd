@@ -61,10 +61,20 @@ find_best_fit <- function(player_row, role_attributes) {
   scores <- apply(role_attributes, 1, function(role_row) {
     cosine_similarity(player_row_numeric, as.numeric(role_row))
   })
-  
+  top_3_roles <- names(sort(scores, decreasing = TRUE)[1:3])
+  # Concatenate the top 3 roles into a single string
+  best_fit_roles <- paste(top_3_roles, collapse = ", ")
+  #print(top_3_roles)
+  # Does not work
+  #names(scores)
+  #print(scores[0])
+  #top_3_scores <- scores %>% arrange(s) %>% head(n=3)
+  #typeof(top_3_scores)
+  print("----------------------------------------------------")
   # Find the role with the highest score
   best_fit_role <- names(which.max(scores))
-  return(best_fit_role)
+  #return(best_fit_role)
+  return(best_fit_roles)
 }
 
 # Load Player Data (example structure)
