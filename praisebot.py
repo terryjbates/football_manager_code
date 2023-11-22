@@ -36,8 +36,8 @@ if reference_image is None:
     raise ValueError("Reference image not found or unable to load.")
 
 # Define the region of the screen to capture (x, y, width, height)
-region_bot_right_x, region_bot_right_y = (1189, 2055) 
-region = (1076, 412, (region_bot_right_x - 1076), (region_bot_right_y - 412))
+rating_region_bot_right_x, rating_region_bot_right_y = (1189, 2055) 
+rating_region = (1076, 412, (rating_region_bot_right_x - 1076), (rating_region_bot_right_y - 412))
 
 # GLOBALS
 HOVER_DURATION = 0.2
@@ -58,8 +58,19 @@ TOP_RIGHT_PRAISE_BUTTON = (3474,284)
 # top right praise button
 MODAL_PRAISE_BUTTON = (1597, 1018)
 
+
+# Back down button in the pop-up dialog.
+MODAL_BACK_DOWN_BUTTON = (1589, 1036)
+
 # End the quick chat in modal pop-up
 END_QC_BUTTON = (2759, 317)
+
+# Set up "defensive" player color and position. The color _may_ change
+# maybe? Not sure if configurable. The "color bar" is the bar that 
+# displays player body language. We choose the section that has not text
+# to prevent this from misfiring.
+DEFENSIVE_COLOR = (153, 147, 87)
+DEFENSIVE_PLAYER_COLOR_BAR = (1237, 717)
 
 
 # Define separate move and click functions
@@ -90,8 +101,14 @@ def orientate():
     # Click first player
     my_move(TOP_PLAYER_AREA)
     my_click()
-    
 
+def player_is_defensive(color=DEFENSIVE_COLOR, position=DEFENSIVE_PLAYER_COLOR_BAR):
+	# Delightfully simple code will return true if we see color in
+	# specified position, false otherwise.
+    x, y = position
+    return pyautogui.pixel(x, y) == (color)
+	
+	
 # To display mouse position
 # pyautogui.displayMousePosition()
 
@@ -102,6 +119,11 @@ def my_praise_click():
     # Click 1st praise choice
     my_move(MODAL_PRAISE_BUTTON)
     my_click()
+	# If player gets defensive, we should see an orange-ey down arrow in certain region.
+	# We should back down after a praise attempt, and the remaining logic should stand.
+	if player_is_defensive():
+		my_move(MODAL_BACK_DOWN_BUTTON)
+		my_click()
     # End chat 
     my_move(END_QC_BUTTON)
     my_click()
@@ -129,8 +151,8 @@ if __name__ == "__main__":
     # Go to Training>Indivdual menus
     orientate()
 
-    # Take a screenshot of the specified region
-    screenshot = pyautogui.screenshot(region=region)
+    # Take a screenshot of the specified rating_region
+    screenshot = pyautogui.screenshot(region=rating_region)
     screenshot = np.array(screenshot)
     screenshot = cv2.cvtColor(screenshot, cv2.COLOR_RGB2BGR)
 
@@ -163,9 +185,9 @@ if __name__ == "__main__":
         center_x = loc[0] + int(reference_image.shape[1] / 2)
         center_y = loc[1] + int(reference_image.shape[0] / 2)
 
-        # Add the region's offset to get the absolute screen position
-        screen_x = region[0] + center_x
-        screen_y = region[1] + center_y
+        # Add the rating_region's offset to get the absolute screen position
+        screen_x = rating_region[0] + center_x
+        screen_y = rating_region[1] + center_y
 
         # Perform the click and praise action
         pyautogui.click(screen_x, screen_y)
