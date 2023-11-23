@@ -53,17 +53,17 @@ def define_region(bottom_right, top_left):
 
     
 # Define the Rating region of the screen to capture (x, y, width, height)
-RATING_REGION_BOT_RIGHT_x, RATING_REGION_BOT_RIGHT_y = (1189, 2055)
 RATING_REGION_BOT_RIGHT = (1189, 2055)
-RATING_REGION_TOP_LEFT_x, RATING_REGION_TOP_LEFT_y = (1076, 412)
 RATING_REGION_TOP_LEFT = (1076, 412)
-#rating_region = (RATING_REGION_TOP_LEFT_x, RATING_REGION_TOP_LEFT_y, 
-#                 (RATING_REGION_BOT_RIGHT_x - RATING_REGION_TOP_LEFT_x),
-#                 (RATING_REGION_BOT_RIGHT_y - RATING_REGION_TOP_LEFT_y))
 
-rating_region = define_region(RATING_REGION_BOT_RIGHT, RATING_REGION_TOP_LEFT)
+RATING_REGION = define_region(RATING_REGION_BOT_RIGHT, RATING_REGION_TOP_LEFT)
+
+
 # Define region of screen where player's face and info appears in Quick Chat
-PLAYER_CHAT_BOT_RIGHT_X, PLAYER_CHAT_BOT_RIGHT_Y = (1376, 1511)
+PLAYER_CHAT_BOT_RIGHT= (1376, 1511)
+PLAYER_CHAT_TOP_LEFT = (958, 375)
+
+PLAYER_CHAT_REGION = define_region(PLAYER_CHAT_BOT_RIGHT, PLAYER_CHAT_TOP_LEFT)
 
 # GLOBALS
 HOVER_DURATION = 0.2
@@ -133,14 +133,9 @@ def orientate():
     my_move(TOP_PLAYER_AREA)
     my_click()
 
-def player_is_defensive(color=DEFENSIVE_COLOR, position=DEFENSIVE_PLAYER_COLOR_BAR):
-	# Delightfully simple code will return true if we see color in
-	# specified position, false otherwise.
-    # This will NOT work because the bar area under player is fluid.
-    x, y = position
-    return pyautogui.pixel(x, y) == (color)
-	    # Take a screenshot of the specified rating_region
-    screenshot = pyautogui.screenshot(region=rating_region)
+def player_is_defensive(player_chat_region):
+	# Take a screenshot of the specified player chat region
+    screenshot = pyautogui.screenshot(region=player_chat_region)
     screenshot = np.array(screenshot)
     screenshot = cv2.cvtColor(screenshot, cv2.COLOR_RGB2BGR)
 
@@ -150,7 +145,7 @@ def player_is_defensive(color=DEFENSIVE_COLOR, position=DEFENSIVE_PLAYER_COLOR_B
     # screenshot = cv2.cvtColor(screenshot, cv2.COLOR_BGR2GRAY)    
 
     # Find the reference image within the screenshot
-    result = cv2.matchTemplate(screenshot, reference_image, cv2.TM_CCOEFF_NORMED)
+    return cv2.matchTemplate(screenshot, defensive_player_image, cv2.TM_CCOEFF_NORMED).any()
 
     
     
@@ -168,7 +163,7 @@ def my_praise_click():
     my_click()
 	# If player gets defensive, we should see an orange-ey down arrow in certain region.
 	# We should back down after a praise attempt, and the remaining logic should stand.
-    if player_is_defensive():
+    if player_is_defensive(PLAYER_CHAT_REGION):
         print("We have found a defensive player")
         my_move(MODAL_BACK_DOWN_BUTTON_1)
         my_click()
