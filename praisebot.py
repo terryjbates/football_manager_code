@@ -36,8 +36,14 @@ if reference_image is None:
     raise ValueError("Reference image not found or unable to load.")
 
 # Define the region of the screen to capture (x, y, width, height)
-rating_region_bot_right_x, rating_region_bot_right_y = (1189, 2055) 
-rating_region = (1076, 412, (rating_region_bot_right_x - 1076), (rating_region_bot_right_y - 412))
+RATING_REGION_BOT_RIGHT_x, RATING_REGION_BOT_RIGHT_y = (1189, 2055)
+RATING_REGION_TOP_LEFT_x, RATING_REGION_TOP_LEFT_y = (1076, 412)
+rating_region = (RATING_REGION_TOP_LEFT_x, RATING_REGION_TOP_LEFT_y, 
+                 (RATING_REGION_BOT_RIGHT_x - RATING_REGION_TOP_LEFT_x),
+                 (RATING_REGION_BOT_RIGHT_y - RATING_REGION_TOP_LEFT_y))
+
+# Define region of screen where player's face and info appears in Quick Chat
+PLAYER_CHAT_BOT_RIGHT_X, PLAYER_CHAT_BOT_RIGHT_Y = (1376, 1511)
 
 # GLOBALS
 HOVER_DURATION = 0.2
@@ -60,7 +66,10 @@ MODAL_PRAISE_BUTTON = (1597, 1018)
 
 
 # Back down button in the pop-up dialog.
-MODAL_BACK_DOWN_BUTTON = (1589, 1036)
+# These can vary based on size of response window.
+MODAL_BACK_DOWN_BUTTON_1 = (1516, 833)
+MODAL_BACK_DOWN_BUTTON_2 = (1516, 1033)
+
 
 # End the quick chat in modal pop-up
 END_QC_BUTTON = (2759, 317)
@@ -69,6 +78,8 @@ END_QC_BUTTON = (2759, 317)
 # maybe? Not sure if configurable. The "color bar" is the bar that 
 # displays player body language. We choose the section that has not text
 # to prevent this from misfiring.
+
+# Set up "defensive" player color and position
 DEFENSIVE_COLOR = (153, 147, 87)
 DEFENSIVE_PLAYER_COLOR_BAR = (1237, 717)
 
@@ -105,9 +116,9 @@ def orientate():
 def player_is_defensive(color=DEFENSIVE_COLOR, position=DEFENSIVE_PLAYER_COLOR_BAR):
 	# Delightfully simple code will return true if we see color in
 	# specified position, false otherwise.
+    # This will NOT work because the bar area under player is fluid.
     x, y = position
     return pyautogui.pixel(x, y) == (color)
-	
 	
 # To display mouse position
 # pyautogui.displayMousePosition()
@@ -121,9 +132,14 @@ def my_praise_click():
     my_click()
 	# If player gets defensive, we should see an orange-ey down arrow in certain region.
 	# We should back down after a praise attempt, and the remaining logic should stand.
-	if player_is_defensive():
-		my_move(MODAL_BACK_DOWN_BUTTON)
-		my_click()
+    if player_is_defensive():
+        print("We have found a defensive player")
+        my_move(MODAL_BACK_DOWN_BUTTON_1)
+        my_click()
+        time.sleep(2)
+        my_move(MODAL_BACK_DOWN_BUTTON_2)
+        my_click()
+
     # End chat 
     my_move(END_QC_BUTTON)
     my_click()
