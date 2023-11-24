@@ -135,3 +135,68 @@ players_best_fit_df <- data.frame(Name = players_df$Name, BestFit = players_best
 print(players_best_fit_df)
 
 ```
+
+# Generate plots for each Role
+```{r}
+# Create a list to store the data frames related to roles
+role_dfs <- list()
+
+# Now that we have player data, we need the role names
+role_names <- data.frame(rownames(role_attributes_t))
+# Rename the column names using colnames 
+# Naming the column "RoleName"
+colnames(role_names) <- c("RoleName")
+
+# A for loop to generate the empty data frames for use later
+for (i in 1:nrow(role_names)) {
+  #print(role_names[i, "RoleName"])
+  role_name <- role_names[i, "RoleName"]
+  role_dfs[[role_name]] <- data.frame()
+}
+
+# View(role_names)
+
+
+# Iterate over each role in our roles dataframe
+for (i in 1:nrow(players_best_fit_df)) {
+  #print(players_best_fit_df[i, "Name"])
+  #print(players_best_fit_df[i, "BestFit"])
+  
+  # Extract player name
+  player_name <- players_best_fit_df[i, "Name"]
+  
+  # Process BestFit to extract data
+  best_fit_string <- players_best_fit_df[i, "BestFit"]
+  
+  # Split on whitespace to obtain pairs of role and score
+  # These will be placed on a list
+  list_of_roles <- strsplit(best_fit_string, ", ")
+  
+  # Initialize empty vectors to store roles and scores
+  roles <- c()
+  scores <- c()
+
+  for (role_pairing in list_of_roles){
+    #print(role_pair)
+    # split_role_pair <- strsplit(role_pair, " ")[[1]]
+    #print(role_pairing)
+    for(role_pair_item in role_pairing){
+      print(player_name)
+      print(role_pair_item)
+    # split_role_pair <- strsplit(role_pair, " ")[[2]]
+    # role <- split_role_pair[1]
+    # score <- as.numeric(split_role_pair[2])
+    # print(player_name)
+    # print(role)
+    # print(score)
+      print("------------------")
+    }
+  }
+}
+
+# Process each player
+# Split the BestFit element by spaces
+# After 
+
+
+```
