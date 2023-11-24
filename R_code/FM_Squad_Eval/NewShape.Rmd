@@ -1,0 +1,128 @@
+---
+title: "Football Manager Player Positional Fit Analysis"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(rvest)
+library(dplyr)
+library(tidyr)
+
+# Any other libraries you need
+
+```
+
+# Define Functions
+```{r}
+# Function to calculate cosine similarity
+cosine_similarity <- function(a, b) {
+  sum(a * b) / (sqrt(sum(a^2)) * sqrt(sum(b^2)))
+}
+
+# Define function to load player data
+load_player_data <- function(players_html) {
+  # Read the HTML and parse the necessary table
+  players_df <- read_html(players_html) %>%
+  html_table() %>%
+  .[[1]] # Assuming the data is in the first table
+  return(players_df) 
+}
+
+# Stupid function for clarity
+load_role_data <- function(role_csv){
+  role_data <- read.csv(role_csv)
+  return(role_data)
+}
+
+# Function to find best positional fit for a player
+find_best_fit <- function(player_row, role_attributes) {
+  # Ensure player_row is numeric
+  player_row_numeric <- as.numeric(player_row)
+  
+  # Calculate similarity scores for each role
+  scores <- apply(role_attributes, 1, function(role_row) {
+    cosine_similarity(player_row_numeric, as.numeric(role_row))
+  })
+  top_3_roles <- names(sort(scores, decreasing = TRUE)[1:3])
+  
+  # Concatenate the top 3 roles into a single string
+  best_fit_roles <- paste(top_3_roles, collapse = ", ")
+
+  # Find the role with the highest score
+  best_fit_role <- names(which.max(scores))
+  
+  #return(best_fit_role)
+  return(best_fit_roles)
+}
+
+```
+
+# Load Player Data
+```{r}
+
+# Replace with the actual HTML file or URL
+players_df <- load_player_data('sesvete_shape_sep_2023.html')
+# View(players_df)
+
+# Data cleaning steps (if necessary)
+# players_df \<- ...
+# Load the predefined M(C) positional attributes
+# This can be loaded from a separate file or defined within the #RMarkdown
+
+# Cleanse extraneous columns
+# Test on one player at first to avoid output blast
+#players_df <- head(players_df)
+```
+
+# Load Attributes Role Data for Targeted Position
+```{r}
+role_attributes <- load_role_data('mc_attributes.csv')
+#View(role_attributes)
+
+```
+
+# Load Test Data
+```{r}
+
+# Load Player Data (example structure)
+# players_df <- data.frame(
+#   Name = c("Player1", "Player2"),
+#   Acc = c(12, 14),
+#   Aer = c(1, 2),
+#   # ... other attributes
+#   Wor = c(15, 16)
+# )
+
+# Load M(C) Attributes Role Data (example structure)
+# role_attributes <- data.frame(
+#   Attribute = c("Acc", "Aer", "Wor"), # and other attributes
+#   Deep_Lying_Playmaker = c(12, 0, 15),
+#   Box_to_Box = c(16, 0, 14),
+#   # ... other roles
+#   stringsAsFactors = FALSE
+# )
+```
+
+# Prepare role data for processing
+```{r}
+# Prepare role_attributes for comparison
+role_attributes_t <- t(role_attributes[-1])
+colnames(role_attributes_t) <- role_attributes$Attribute
+rownames(role_attributes_t) <- names(role_attributes)[-1]
+```
+
+# Process Player Data for Best Fit
+```{r}
+# Process each player's attributes and find their best role fit
+players_best_fit <- apply(players_df[, -1], 1, function(player_row) {
+  find_best_fit(player_row, role_attributes_t)
+})
+
+# Adding player names to the result
+players_best_fit_df <- data.frame(Name = players_df$Name, BestFit = players_best_fit)
+
+# Display the result
+print(players_best_fit_df)
+
+```
