@@ -44,16 +44,22 @@ find_best_fit <- function(player_row, role_attributes) {
   scores <- apply(role_attributes, 1, function(role_row) {
     cosine_similarity(player_row_numeric, as.numeric(role_row))
   })
-  top_3_roles <- names(sort(scores, decreasing = TRUE)[1:3])
+  
+  top_3_role_names <- names(sort(scores, decreasing = TRUE)[1:3])
+  top_3_roles_scores <- sort(scores, decreasing = TRUE)[1:3]
+
   
   # Concatenate the top 3 roles into a single string
-  best_fit_roles <- paste(top_3_roles, collapse = ", ")
+  best_fit_roles <- paste(top_3_role_names, collapse = ", ")
 
+  # Combine names and scores into single vector, separating elements from each vector
+  # by a space, but collapsing the elements internally by ","
+  top_3_concat <- paste(top_3_role_names, top_3_roles_scores, sep = " ", collapse = ", ")
   # Find the role with the highest score
-  best_fit_role <- names(which.max(scores))
+  #best_fit_role <- names(which.max(scores))
   
   #return(best_fit_role)
-  return(best_fit_roles)
+  return(top_3_concat)
 }
 
 ```
@@ -74,6 +80,7 @@ players_df <- load_player_data('sesvete_shape_sep_2023.html')
 # Test on one player at first to avoid output blast
 #players_df <- head(players_df)
 ```
+
 
 # Load Attributes Role Data for Targeted Position
 ```{r}
@@ -104,6 +111,7 @@ role_attributes <- load_role_data('mc_attributes.csv')
 # )
 ```
 
+
 # Prepare role data for processing
 ```{r}
 # Prepare role_attributes for comparison
@@ -111,6 +119,7 @@ role_attributes_t <- t(role_attributes[-1])
 colnames(role_attributes_t) <- role_attributes$Attribute
 rownames(role_attributes_t) <- names(role_attributes)[-1]
 ```
+
 
 # Process Player Data for Best Fit
 ```{r}
