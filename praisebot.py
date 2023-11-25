@@ -94,6 +94,11 @@ MODAL_BACK_DOWN_BUTTON_2 = (1516, 1033)
 # End the quick chat in modal pop-up
 END_QC_BUTTON = (2759, 317)
 
+
+# We need to "scroll down" to find more players if we have good 
+# rating players below the fold. We click in the right gutter area
+SCROLL_DOWN_GUTTER = (1218, 2064)
+
 # Set up "defensive" player color and position. The color _may_ change
 # maybe? Not sure if configurable. The "color bar" is the bar that 
 # displays player body language. We choose the section that has not text
@@ -133,7 +138,7 @@ def orientate():
     my_move(TOP_PLAYER_AREA)
     my_click()
 
-def player_is_defensive(player_chat_region):
+def player_is_defensive(player_chat_region, reference_image=reference_image, defensive_player_image=defensive_player_image):
 	# Take a screenshot of the specified player chat region
     screenshot = pyautogui.screenshot(region=player_chat_region)
     screenshot = np.array(screenshot)
@@ -204,13 +209,8 @@ def click_praise_buttons():
     my_move(END_QC_BUTTON)
     my_click()
 
-
-if __name__ == "__main__":
-    # Provide time to move alt-tab to app
-    time.sleep(2)
-    # Go to Training>Indivdual menus
-    orientate()
-
+def click_ratings(rating_region):
+	
     # Take a screenshot of the specified rating_region
     screenshot = pyautogui.screenshot(region=rating_region)
     screenshot = np.array(screenshot)
@@ -262,3 +262,16 @@ if __name__ == "__main__":
         #    break
         # Optionally, add a small delay between processing each location
         time.sleep(0.2)
+
+	
+	
+if __name__ == "__main__":
+    # Provide time to move alt-tab to app
+    time.sleep(2)
+    # Go to Training>Indivdual menus
+    orientate()
+
+    click_ratings(RATING_REGION)
+    my_move(SCROLL_DOWN_GUTTER)
+    my_click()
+    click_ratings(RATING_REGION)
