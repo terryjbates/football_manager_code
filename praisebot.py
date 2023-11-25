@@ -53,7 +53,7 @@ def define_region(bottom_right, top_left):
 
     
 # Define the Rating region of the screen to capture (x, y, width, height)
-RATING_REGION_BOT_RIGHT = (1189, 2055)
+RATING_REGION_BOT_RIGHT = (1189, 2122)
 RATING_REGION_TOP_LEFT = (1076, 412)
 
 RATING_REGION = define_region(RATING_REGION_BOT_RIGHT, RATING_REGION_TOP_LEFT)
@@ -145,8 +145,21 @@ def player_is_defensive(player_chat_region):
     # screenshot = cv2.cvtColor(screenshot, cv2.COLOR_BGR2GRAY)    
 
     # Find the reference image within the screenshot
-    return cv2.matchTemplate(screenshot, defensive_player_image, cv2.TM_CCOEFF_NORMED).any()
+    result = cv2.matchTemplate(screenshot, defensive_player_image, cv2.TM_CCOEFF_NORMED)
 
+    # Set a threshold for the maximum score
+    threshold = 0.9
+
+    # Find the maximum score and its location
+    min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)
+
+    # Check if the maximum score is above the threshold
+    if max_val > threshold:
+        print('Template image found at location:', max_loc)
+        return True
+    else:
+        print('Template image not found')
+        return None
     
     
     
