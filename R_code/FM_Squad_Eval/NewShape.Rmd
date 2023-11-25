@@ -136,7 +136,7 @@ print(players_best_fit_df)
 
 ```
 
-# Generate plots for each Role
+# Generate list of data frames for each Role
 ```{r}
 # Create a list to store the data frames related to roles
 role_dfs <- list()
@@ -155,8 +155,11 @@ for (i in 1:nrow(role_names)) {
 }
 
 # View(role_names)
+```
 
-
+# Process the players data frame to extract roles and scores
+```{r}
+foo_list = list()
 # Iterate over each role in our roles dataframe
 for (i in 1:nrow(players_best_fit_df)) {
   #print(players_best_fit_df[i, "Name"])
@@ -175,28 +178,42 @@ for (i in 1:nrow(players_best_fit_df)) {
   # Initialize empty vectors to store roles and scores
   roles <- c()
   scores <- c()
-
-  for (role_pairing in list_of_roles){
+  
+  for (role_pairing in list_of_roles) {
     #print(role_pair)
     # split_role_pair <- strsplit(role_pair, " ")[[1]]
     #print(role_pairing)
-    for(role_pair_item in role_pairing){
-      print(player_name)
-      print(role_pair_item)
-    # split_role_pair <- strsplit(role_pair, " ")[[2]]
-    # role <- split_role_pair[1]
-    # score <- as.numeric(split_role_pair[2])
-    # print(player_name)
-    # print(role)
-    # print(score)
-      print("------------------")
+    for (role_pair_item in role_pairing) {
+      # Woefully unintuitive method of extracting the list contents
+      # Element [0] is just a list description
+      role_pair_item_list = strsplit(role_pair_item[1], " ")
+      
+      # Extract the name of the role
+      player_role_name = role_pair_item_list[[1]][[1]]
+      
+      # Extract the player's score in that role
+      player_role_score = role_pair_item_list[[1]][[2]]
+      player_role_score <- as.numeric(player_role_score)
+      #print(player_role_name)
+      #print(player_role_score)
+      
+      # Append the score to the corresponding data frame in roles_df
+      
+      
+      role_dfs[[player_role_name]] <-
+        rbind(role_dfs[[player_role_name]],
+              data.frame(Player = player_name,
+                         Score = player_role_score))
+      
     }
   }
 }
 
+#View(foo_list)
 # Process each player
 # Split the BestFit element by spaces
-# After 
+# After
+View(role_dfs)
 
 
 ```
