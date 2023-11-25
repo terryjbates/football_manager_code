@@ -193,13 +193,12 @@ for (i in 1:nrow(players_best_fit_df)) {
       
       # Extract the player's score in that role
       player_role_score = role_pair_item_list[[1]][[2]]
+      # Turn the character into a numeric
       player_role_score <- as.numeric(player_role_score)
       #print(player_role_name)
       #print(player_role_score)
       
       # Append the score to the corresponding data frame in roles_df
-      
-      
       role_dfs[[player_role_name]] <-
         rbind(role_dfs[[player_role_name]],
               data.frame(Player = player_name,
@@ -213,7 +212,12 @@ for (i in 1:nrow(players_best_fit_df)) {
 # Process each player
 # Split the BestFit element by spaces
 # After
-View(role_dfs)
+# View(role_dfs)
 
+```
 
+```{r}
+ggplot(data= role_dfs[["Mezzala"]], aes(x=Player, y=Score)) + 
+  geom_col() +
+  coord_flip()
 ```
