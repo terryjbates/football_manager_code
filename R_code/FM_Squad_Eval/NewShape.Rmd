@@ -2,7 +2,7 @@
 title: "Football Manager Player Positional Fit Analysis"
 output: html_document
 ---
-
+# Setup
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE,warning = FALSE)
 library(rvest)
@@ -16,6 +16,11 @@ theme_set(
   )
 )
 
+today <- Sys.Date() # Get the current date
+today_formatted <- format(today, "%Y-%m-%d") # Format the date
+today_formatted # Print the output
+
+plot_output_dir = "./plots/"
 # Any other libraries you need
 
 ```
@@ -80,6 +85,7 @@ truncate_name <- function(player_name){
 
 ```
 
+
 # Load Player Data
 ```{r}
 
@@ -98,12 +104,15 @@ players_df <- load_player_data('sesvete_shape_sep_2023.html')
 ```
 
 
+
 # Load Attributes Role Data for Targeted Position
 ```{r}
 role_attributes <- load_role_data('mc_attributes.csv')
 #View(role_attributes)
 
 ```
+
+
 
 # Load Test Data
 ```{r}
@@ -137,6 +146,10 @@ rownames(role_attributes_t) <- names(role_attributes)[-1]
 ```
 
 
+
+
+
+
 # Process Player Data for Best Fit
 ```{r}
 # Process each player's attributes and find their best role fit
@@ -151,6 +164,7 @@ players_best_fit_df <- data.frame(Name = players_df$Name, BestFit = players_best
 print(players_best_fit_df)
 
 ```
+
 
 # Generate list of data frames for each Role
 ```{r}
@@ -172,6 +186,7 @@ for (i in 1:nrow(role_names)) {
 
 # View(role_names)
 ```
+
 
 # Process the players data frame to extract roles and scores
 ```{r}
@@ -241,7 +256,8 @@ ggplot(data= role_dfs[["Mezzala"]], aes(x=Player, y=Score)) +
   )
 ```
 
-# Experiment with plotting and sorting bar chart
+
+# Mezzala Experiment with plotting and sorting bar chart
 ```{r}
 
 mezzala_df <- role_dfs[["Mezzala"]]
@@ -255,7 +271,7 @@ mezzala_df |>
   labs(y = 'Percent Mezzala Score')
 
 ```
-# Experiment with plotting and sorting bar chart
+
 ```{r}
 # The Point graph feels better to use. It is smart enough to truncate the X-axis
 # to allow for easier viewing, unlike the bar plot. It makes the difference 
@@ -283,7 +299,7 @@ mezzala_plot <- mezzala_df |>
   
   geom_point() +
   coord_flip() +
-  labs(y = 'Percent Score', title= "Mezzala Shape Match")
+  labs(x= 'Player', y = 'Score', title= "Mezzala Match Percentage")
 
 mezzala_plot 
 # Show labels as numerical percentages
@@ -292,4 +308,41 @@ mezzala_plot + scale_y_continuous(labels = scales::percent)
 # mezzala_plot + 
 #   theme(panel.grid.major = element_line(colour="white", linetype = "dotted")) + 
 #   scale_x_discrete(labels = short_name)
+```
+
+
+# Generate plots for every role
+
+```{r}
+# Iterate over every role and generate plots
+
+for (i in 1:nrow(role_names)) {
+  role_name <- role_names[i, "RoleName"]
+  #print(role_name)
+  #role_dfs[[role_name]] <- data.frame()
+  # Access the data frame on the list
+  print(paste("Accessing the", role_name, "role"))
+  role_df <- role_dfs[[role_name]]
+  
+  # Create shortened names for plot labels, first extract current player name
+  player_names <- role_df$Player
+  truncated_names <- unlist(lapply(player_names, truncate_name))
+
+  role_df <- mutate(role_df, short_name = truncated_names)
+  graph_title <- paste(role_name, " Match Percentage")
+  output_plot_name <- paste0(plot_output_dir, today_formatted, "_",  role_name, ".png")
+  print(output_plot_name)
+  role_plot <- role_df |>
+    #arrange(desc(Score)) |>
+    #mutate(Player = fct_reorder(Player, Score)) |>
+    mutate(short_name = fct_reorder(short_name, Score)) |>
+    ggplot(aes(x = short_name, y = Score)) +
+    
+    geom_point() +
+    coord_flip() +
+    labs(x= 'Player', y = 'Score', title = graph_title) +
+    scale_y_continuous(labels = scales::percent)
+  
+  ggsave(output_plot_name, plot=role_plot)
+}
 ```
