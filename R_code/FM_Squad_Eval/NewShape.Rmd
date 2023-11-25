@@ -266,7 +266,10 @@ mezzala_df <- role_dfs[["Mezzala"]]
 # Create shortened names for plot labels
 
 player_names <- mezzala_df$Player
-truncated_names <- lapply(player_names, truncate_name)
+# Apparently use lapply will apply the function to every element
+# of player_names, but will return a list. We "unlist" this 
+# afterwards.
+truncated_names <- unlist(lapply(player_names, truncate_name))
 
 # Mutate to overwrite the original names with the 
 # shortened names.
@@ -275,14 +278,16 @@ mezzala_df <- mutate(mezzala_df, short_name = truncated_names)
 mezzala_plot <- mezzala_df |>
   #arrange(desc(Score)) |>
   #mutate(Player = fct_reorder(Player, Score)) |>
-  mutate(Player = fct_reorder(Player, Score)) |>
-  ggplot(aes(x= Player, y = Score)) +
+  mutate(short_name = fct_reorder(short_name, Score)) |>
+  ggplot(aes(x = short_name, y = Score)) +
   
   geom_point() +
   coord_flip() +
   labs(y = 'Percent Score', title= "Mezzala Shape Match")
 
-mezzala_plot
+mezzala_plot 
+# Show labels as numerical percentages
+mezzala_plot + scale_y_continuous(labels = scales::percent)
 
 # mezzala_plot + 
 #   theme(panel.grid.major = element_line(colour="white", linetype = "dotted")) + 
