@@ -23,7 +23,7 @@ cosine_similarity <- function(a, b) {
 # Define function to load player data
 load_player_data <- function(players_html) {
   # Read the HTML and parse the necessary table
-  players_df <- read_html(players_html) %>%
+  players_df <- read_html(players_html, encoding = "utf-8") %>%
   html_table() %>%
   .[[1]] # Assuming the data is in the first table
   return(players_df) 
