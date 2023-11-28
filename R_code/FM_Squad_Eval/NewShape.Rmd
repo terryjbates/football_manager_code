@@ -2,20 +2,23 @@
 title: "Football Manager Player Positional Fit Analysis"
 output: html_document
 ---
+
 # Setup
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE,warning = FALSE)
+install.packages("scales")
 library(rvest)
 library(dplyr)
 library(tidyr)
 library(tidyverse)
+library(scales)
 theme_set(
-  theme_dark(
+  theme_classic(
     base_size = 16,
     base_family = 'Source Sans Pro'
   )
 )
-
 today <- Sys.Date() # Get the current date
 today_formatted <- format(today, "%Y-%m-%d") # Format the date
 today_formatted # Print the output
@@ -26,6 +29,7 @@ plot_output_dir = "./plots/"
 ```
 
 # Define Functions
+
 ```{r}
 # Function to calculate cosine similarity
 cosine_similarity <- function(a, b) {
@@ -85,12 +89,16 @@ truncate_name <- function(player_name){
 
 ```
 
-
 # Load Player Data
+
 ```{r}
 
 # Replace with the actual HTML file or URL
-players_df <- load_player_data('sesvete_shape_sep_2023.html')
+#players_df <- load_player_data('sesvete_shape_sep_2023.html')
+
+players_df <- load_player_data('dc_dm_nov_2023.html')
+
+
 # View(players_df)
 
 # Data cleaning steps (if necessary)
@@ -103,18 +111,16 @@ players_df <- load_player_data('sesvete_shape_sep_2023.html')
 #players_df <- head(players_df)
 ```
 
-
-
 # Load Attributes Role Data for Targeted Position
+
 ```{r}
 role_attributes <- load_role_data('mc_attributes.csv')
 #View(role_attributes)
 
 ```
 
-
-
 # Load Test Data
+
 ```{r}
 
 # Load Player Data (example structure)
@@ -136,8 +142,8 @@ role_attributes <- load_role_data('mc_attributes.csv')
 # )
 ```
 
-
 # Prepare role data for processing
+
 ```{r}
 # Prepare role_attributes for comparison
 role_attributes_t <- t(role_attributes[-1])
@@ -145,12 +151,8 @@ colnames(role_attributes_t) <- role_attributes$Attribute
 rownames(role_attributes_t) <- names(role_attributes)[-1]
 ```
 
-
-
-
-
-
 # Process Player Data for Best Fit
+
 ```{r}
 # Process each player's attributes and find their best role fit
 players_best_fit <- apply(players_df[, -1], 1, function(player_row) {
@@ -165,8 +167,8 @@ print(players_best_fit_df)
 
 ```
 
-
 # Generate list of data frames for each Role
+
 ```{r}
 # Create a list to store the data frames related to roles
 role_dfs <- list()
@@ -187,8 +189,8 @@ for (i in 1:nrow(role_names)) {
 # View(role_names)
 ```
 
-
 # Process the players data frame to extract roles and scores
+
 ```{r}
 foo_list = list()
 # Iterate over each role in our roles dataframe
@@ -256,8 +258,8 @@ ggplot(data= role_dfs[["Mezzala"]], aes(x=Player, y=Score)) +
   )
 ```
 
-
 # Mezzala Experiment with plotting and sorting bar chart
+
 ```{r}
 
 mezzala_df <- role_dfs[["Mezzala"]]
@@ -276,8 +278,8 @@ mezzala_df |>
 # The Point graph feels better to use. It is smart enough to truncate the X-axis
 # to allow for easier viewing, unlike the bar plot. It makes the difference 
 # between the player levels more apparent. 
-
-mezzala_df <- role_dfs[["Mezzala"]]
+my_role_name <- "Mezzala"
+mezzala_df <- role_dfs[[my_role_name]]
 
 # Create shortened names for plot labels
 
@@ -291,25 +293,31 @@ truncated_names <- unlist(lapply(player_names, truncate_name))
 # shortened names.
 mezzala_df <- mutate(mezzala_df, short_name = truncated_names)
 
-mezzala_plot <- mezzala_df |>
-  #arrange(desc(Score)) |>
-  #mutate(Player = fct_reorder(Player, Score)) |>
-  mutate(short_name = fct_reorder(short_name, Score)) |>
-  ggplot(aes(x = short_name, y = Score)) +
-  
-  geom_point() +
-  coord_flip() +
-  labs(x= 'Player', y = 'Score', title= "Mezzala Match Percentage")
+threshold_value = 0.93
+mezzala_plot <- mezzala_df %>%
+  mutate(short_name = fct_reorder(short_name, Score)) %>%
+  ggplot(aes(x = short_name, y = Score, fill = ifelse(Score > threshold_value, "Above threshold", "Below threshold"))) +
+  geom_col() +
+  geom_hline(yintercept = threshold_value, linetype = "dotted", color = "red") +
+  scale_fill_manual(name = "Threshold Group", values = c("Above threshold" = "green", "Below threshold" = "#0099f9")) +
+  scale_y_continuous(labels = scales::percent) +
+  coord_flip(ylim = c(0.75, 1)) + # Adjust x-axis view after flipping the coordinates
+  labs(y = 'Percent Match', title = paste("Players best fit to play", my_role_name), subtitle = paste("Threshold value:", percent(threshold_value))) +
+  theme(
+    axis.title.y = element_blank(),
+    plot.subtitle = element_text(size = 11)
+  )
 
-mezzala_plot 
+mezzala_plot
+
+
 # Show labels as numerical percentages
-mezzala_plot + scale_y_continuous(labels = scales::percent)
+#mezzala_plot + scale_y_continuous(labels = scales::percent)
 
 # mezzala_plot + 
 #   theme(panel.grid.major = element_line(colour="white", linetype = "dotted")) + 
 #   scale_x_discrete(labels = short_name)
 ```
-
 
 # Generate plots for every role
 
@@ -345,4 +353,20 @@ for (i in 1:nrow(role_names)) {
   
   ggsave(output_plot_name, plot=role_plot)
 }
+```
+
+```{r}
+# Example data
+df <- data.frame(
+  category = c("A", "B", "C", "D"),
+  percentage = c(85, 92, 75, 95)
+)
+
+# Create the plot
+ggplot(df, aes(x = category, y = percentage, fill = ifelse(percentage > 90, "Above 90", "Below 90"))) +
+  geom_col() +
+  scale_fill_manual(values = c("Above 90" = "red", "Below 90" = "blue")) +
+  geom_text(aes(label = paste0(percentage, "%")), vjust = -0.3) +
+  labs(x = "Category", y = "Percentage") +
+  theme_minimal()
 ```
