@@ -99,6 +99,11 @@ END_QC_BUTTON = (2759, 317)
 # rating players below the fold. We click in the right gutter area
 SCROLL_DOWN_GUTTER = (1218, 2064)
 
+# We need to "scroll down" to find more players if we have good 
+# rating players below the fold. We click in the right gutter area
+SCROLL_UP_GUTTER = (1218, 417)
+
+
 # Set up "defensive" player color and position. The color _may_ change
 # maybe? Not sure if configurable. The "color bar" is the bar that 
 # displays player body language. We choose the section that has not text
@@ -271,7 +276,11 @@ if __name__ == "__main__":
     # Go to Training>Indivdual menus
     orientate()
 
+    my_move(SCROLL_UP_GUTTER)
+    my_click()
     click_ratings(RATING_REGION)
     my_move(SCROLL_DOWN_GUTTER)
     my_click()
     click_ratings(RATING_REGION)
+    my_move(SCROLL_UP_GUTTER)
+    my_click()
