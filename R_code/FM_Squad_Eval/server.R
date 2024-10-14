@@ -312,6 +312,29 @@ function(input, output, session) {
           color = c('rgba(205, 205, 205, 0.5)'),
           name = "Mean Value Plane"
         ) %>%
+        # Add a large red dot at the origin
+        add_markers(
+          x = 0, y = 0, z = 0,
+          marker = list(color = 'red', size = 12),
+          name = "Origin"
+        ) %>%
+        
+        # Add dark line for x=0
+        add_trace(
+          x = c(1, 0), y = c(min(filtered_df$Y), max(filtered_df$Y)), z = c(0, 0),
+          type = "scatter3d", mode = "lines",
+          line = list(color = 'black', width = 2),
+          showlegend = FALSE
+        ) %>%
+        
+        # Add dark line for y=0
+        add_trace(
+          x = c(min(filtered_df$X), max(filtered_df$X)), y = c(0, 0), z = c(0, 0),
+          type = "scatter3d", mode = "lines",
+          line = list(color = 'black', width = 2),
+          showlegend = FALSE
+        ) %>%
+        
         layout(scene = list(
           xaxis = list(title = "GoalMouth"),
           yaxis = list(title = "Byline"),
@@ -601,8 +624,11 @@ function(input, output, session) {
     } 
 
     #Remove 'Age' from plot for weirdness
+    if(!input$show_ages){
     filtered_df <- filtered_df[,!colnames(filtered_df) %in% c('Age')]
-    
+    }
+    # Remove UID completel
+    filtered_df <- filtered_df[,!colnames(filtered_df) %in% c('UID')]
     # Get the mean values of numerical attributes
     numerical_attributes <- filtered_df %>%
       select_if(is.numeric) %>%

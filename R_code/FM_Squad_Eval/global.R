@@ -55,7 +55,7 @@ class_attrib_lookup <- list(Defenders = c("Hea", "Mar", "Tck", "Pos", "Jum", "St
                                                         "Cmp", "Dec", "OtB", "Tea",
                                                         "Vis","Fla"),
                             Forwards = c("Dri", "Fin", "Fir", "Tec", "Cmp",
-                                         "OtB", "Cmp", "Acc", "Pac")
+                                         "OtB", "Cmp", "Acc", "Pac", "Str")
                             )
 
 # Position mapping

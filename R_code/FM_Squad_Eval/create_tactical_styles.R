@@ -3,20 +3,7 @@ library(readr)
 library(data.table)
 
 # Comprehensive tactical styles data frame with distinct weightings and additional attributes
-tactical_styles_df <- tribble(
-  ~Style,                  ~Det, ~Pac, ~Acc, ~Ant, ~Agg, ~Bra, ~Dec, ~Pos, ~Jum, ~Nat, ~Fir, ~Pas, ~Fla, ~Cmp, ~Vis, ~Tea, ~Dri, ~Wor, ~OtB, ~Cro, ~Tck, ~Formations,
-  "Gegenpress",            18,   14,   14,   16,   12,   8,    10,   6,    3,    2,    4,    5,    4,    6,    7,    5,    9,    11,   10,   9,    8,    "4-2-3-1, 3-4-3, 3-1-4-2",
-  "Tiki-Taka",             8,    12,   12,   20,   6,    10,   18,   15,   1,    1,    12,   18,   15,   10,   17,   16,   5,    13,   9,    10,   5,    "4-3-3 False 9, 3-4-3 Diamond, 3-6-1",
-  "Route One",             5,    18,   5,    7,    15,   16,   4,    6,    20,   10,   2,    2,    1,    2,    3,    1,    4,    5,    3,    3,    16,   "4-4-2, 5-3-2, 4-1-3-2",
-  "Counter-Attack",        6,    16,   14,   10,   8,    7,    6,    8,    12,   1,    5,    13,   7,    6,    8,    7,    9,    10,   7,    14,   12,   "4-4-2 Classic, 4-1-4-1, 5-4-1",
-  "Possession",            10,   6,    10,   17,   5,    20,   19,   14,   2,    3,    9,    11,   16,   17,   19,   11,   12,   14,   13,   12,   4,    "4-3-3 Holding, 4-5-1, 4-1-4-1",
-  "Direct Play",           12,   8,    8,    9,    18,   6,    5,    4,    17,   15,   3,    4,    6,    5,    4,    3,   13,   12,   11,   11,   14,   "4-2-3-1 Wide, 3-4-1-2, 4-3-1-2",
-  "Fluid Counter-Attack",  7,    17,   16,   13,   7,    9,    5,    7,    11,   4,    6,    15,   13,   10,   9,    8,   10,   15,   12,   13,   11,   "4-3-3, 3-5-2, 5-2-2-1",
-  "Control Possession",    9,    7,    13,   19,   4,    18,   19,   13,   2,    3,   11,   17,   19,   14,   17,   13,    6,   16,   15,   15,   3,    "4-1-4-1 DM Wide, 4-2-3-1 Deep, 3-4-3",
-  "Pressing",              17,   11,   9,    13,   14,   11,   9,    7,    6,    3,   10,   12,   11,   13,   15,   12,   14,   16,   13,   8,    7,    "4-1-4-1 DM Wide, 4-2-3-1 Deep, 3-4-3",
-  "Total Football",        11,   13,   13,   15,   9,    12,   14,   11,   2,    2,   14,   16,   15,   13,   14,   16,   15,   18,   17,   6,    10,   "3-4-3 Diamond, 4-3-3, 4-2-3-1",
-  "Vertical Tiki Taka",    9,    10,   15,   18,   7,    13,   17,   10,   1,    1,   16,   17,   16,   12,   18,   15,   6,    14,   11,   2,    5,    "4-3-3 Holding, 3-2-2-3, 3-1-4-2"
-)
+
 
 
 # Delete an unwanted row by index "Total Football"
@@ -25,6 +12,24 @@ tactical_styles_df <- tribble(
 # Write the data frame to a CSV file
 write_csv(tactical_styles_df, "C:/Users/lover/Documents/Github/football_manager_code/R_code/FM_Squad_Eval/tactical_style_weightings.csv")
 
+tactical_styles_df <- tribble(
+  ~Style,                  ~Det, ~Pac, ~Acc, ~Ant, ~Agg, ~Bra, ~Dec, ~Pos, ~Jum, ~Nat, ~Fir, ~Pas, ~Fla, ~Cmp, ~Vis, ~Tea, ~Dri, ~Wor, ~OtB, ~Cro, ~Tck, ~Sta, ~Tec, ~Str, ~Formations,
+  "Gegenpress",            16,   15,   15,   14,   13,   12,   12,   10,   8,    5,    7,    8,    6,    8,    10,   9,    11,   16,   13,   11,   10,   16,   10,   9,    "4-2-3-1, 3-4-3, 3-1-4-2",
+  "Tiki-Taka",             12,   10,   10,   18,   6,    8,    16,   15,   4,    3,    14,   19,   17,   16,   18,   17,   6,    14,   11,   9,    8,    10,   13,   7,    "4-3-3 False 9, 3-4-3 Diamond, 3-6-1",
+  "Route One",             6,    16,   6,    8,    16,   17,   5,    6,    18,   14,   3,    3,    2,    4,    5,    2,    16,   6,    5,    4,    18,   11,   8,    14,   "4-4-2, 5-3-2, 4-1-3-2",
+  "Counter-Attack",        8,    17,   16,   11,   9,    10,   8,    10,   13,   3,    6,    13,   9,    8,    10,   9,    12,   12,   10,   16,   12,   13,   9,    8,    "4-4-2 Classic, 4-1-4-1, 5-4-1",
+  "Possession",            11,   8,    9,    17,   5,    9,    17,   16,   4,    4,    11,   13,   16,   15,   17,   14,   13,   15,   14,   12,   6,    12,   10,   8,    "4-3-3 Holding, 4-5-1, 4-1-4-1",
+  "Direct Play",           13,   10,   10,   9,    17,   8,    6,    5,    16,   15,   4,    5,    7,    6,    6,    4,    14,   13,   12,   11,   15,   14,   8,    16,   "4-2-3-1 Wide, 3-4-1-2, 4-3-1-2",
+  "Fluid Counter-Attack",  10,   16,   15,   13,   8,    11,   6,    9,    12,   5,    7,    14,   12,   10,   11,   9,    11,   16,   13,   14,   11,   12,   10,   9,    "4-3-3, 3-5-2, 5-2-2-1",
+  "Control Possession",    10,   9,    12,   18,   4,    10,   18,   14,   3,    4,    12,   16,   18,   14,   16,   14,   7,    16,   15,   14,   5,    11,   9,    6,    "4-1-4-1 DM Wide, 4-2-3-1 Deep, 3-4-3",
+  "High Press",            15,   13,   11,   13,   12,   13,   11,   9,    8,    6,    10,   12,   11,   13,   13,   14,   17,   14,   10,   9,    15,   12,   11,   10,   "4-1-4-1 DM Wide, 4-2-3-1 Deep, 3-4-3",
+  "Total Football",        13,   15,   15,   15,   11,   14,   14,   11,   4,    4,    16,   17,   15,   15,   16,   17,   17,   19,   17,   8,    12,   13,   10,   11,   "3-4-3 Diamond, 4-3-3, 4-2-3-1",
+  "Vertical Tiki Taka",    11,   12,   15,   17,   7,    14,   15,   12,   3,    3,    18,   17,   17,   14,   17,   16,   8,    14,   13,   4,    7,    12,   10,   9,    "4-3-3 Holding, 3-2-2-3, 3-1-4-2",
+  "Counter Press",         14,   15,   13,   12,   11,   13,   10,   10,   7,    6,    10,   12,   11,   10,   12,   11,   13,   16,   14,   12,   11,   15,   12,   11,   "4-3-3, 4-2-3-1, 4-4-2"
+)
+
+# Write the data frame to a CSV file
+write_csv(tactical_styles_df, "C:/Users/lover/Documents/Github/football_manager_code/R_code/FM_Squad_Eval/tactical_style_weightings.csv")
 
 # # Comprehensive tactical styles data frame with distinct weightings and additional attributes
 # tactical_styles_df <- tribble(

@@ -28,7 +28,8 @@ ui <- fluidPage(
         value = 4,
         step = 0.5
       ),
-      checkboxInput("show_names", "Show Player Names", TRUE),
+      checkboxInput("show_names", "Show Names", TRUE),
+      checkboxInput("show_ages", "Show Ages", TRUE),
       checkboxGroupInput(
         "playerClass",
         label = "Select player classes to view",

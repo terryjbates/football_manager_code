@@ -8,8 +8,6 @@ knitr::opts_chunk$set(echo = TRUE)
 library(rvest)
 library(dplyr)
 library(tidyr)
-library(ggplot2)
-library(plotly)
 # Any other libraries you need
 
 ```
@@ -18,22 +16,13 @@ library(plotly)
 
 ```{r}
 # Replace with the actual HTML file or URL
-# players_html <- 'sesvete_shape_sep_2023.html'
-
-players_html <- 'Aduana_Stars_Squad_Dump.html'
-
-head(players_html)
+players_html <- 'dm_eval_sep_2023.html'
 
 # Read the HTML and parse the necessary table
 players_df <- read_html(players_html) %>%
   html_table() %>%
   .[[1]] # Assuming the data is in the first table
 
-players_df['UUID'] <- NULL
-players_df['Best Pos'] <- NULL
-players_df['Potential'] <- NULL
-players_df['Height'] <- NULL
-players_df['WR'] <- NULL
 
 # Data cleaning steps (if necessary)
 # players_df \<- ...
@@ -45,15 +34,14 @@ players_df['WR'] <- NULL
 #players_df <- head(players_df)
 ```
 
-# Load Attributes Role Data for M (C)
+# Load Attributes Role Data for DM
 
 ```{r}
-mc_attributes <- read.csv('mc_attributes.csv')
+mc_attributes <- read.csv('dm_attributes.csv')
 
 ```
 
 # Whatever
-
 ```{r}
 # Libraries
 library(dplyr)
@@ -82,7 +70,7 @@ find_best_fit <- function(player_row, role_attributes) {
   #print(scores[0])
   #top_3_scores <- scores %>% arrange(s) %>% head(n=3)
   #typeof(top_3_scores)
-  #print("----------------------------------------------------")
+  print("----------------------------------------------------")
   # Find the role with the highest score
   best_fit_role <- names(which.max(scores))
   #return(best_fit_role)
@@ -112,9 +100,6 @@ mc_attributes_t <- t(mc_attributes[-1])
 colnames(mc_attributes_t) <- mc_attributes$Attribute
 rownames(mc_attributes_t) <- names(mc_attributes)[-1]
 
-
-
-
 # Process each player's attributes and find their best role fit
 players_best_fit <- apply(players_df[, -1], 1, function(player_row) {
   find_best_fit(player_row, mc_attributes_t)
@@ -126,19 +111,5 @@ players_best_fit_df <- data.frame(Name = players_df$Name, BestFit = players_best
 # Display the result
 print(players_best_fit_df)
 
-
-```
-```{r}
-
-# Show a plot of Cmp versus Fla
-cmp_vs_fla <- ggplot(data=player_df, aes(x=Fla,y=Cmp)) +
-  geom_point(aes(text = Name))
-  # geom_text(aes(label = Name), nudge_y = 0.2)
-  # geom_point(aes(color=Position), show.legend=FALSE) + # Omit the legend
-  # geom_point(aes(color=Position), show.legend=FALSE) + # Omit the legend
-  # facet_wrap(~Position) +  # Create multiple graphs by position
-  # geom_text(aes(label=Name)) # Add a label of last name to ID player
-
-ggplotly(cmp_vs_fla, tooltip = "text")
 
 ```
