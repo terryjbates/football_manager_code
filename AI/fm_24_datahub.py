@@ -32,7 +32,7 @@ def extract_table_from_html(html):
     return df
 
 # =============================================================================
-# 🩹 COLUMN CLEANING & TYPE DETECTION
+# 🧩 COLUMN CLEANING & TYPE DETECTION
 # =============================================================================
 
 def clean_numeric_column(series):
@@ -93,21 +93,18 @@ def expand_positions(pos_string):
 # =============================================================================
 
 st.set_page_config(page_title="FM24 Data Hub", layout="wide")
-st.title("📊 FM24 Squad/Scouting Data Hub Replica")
+st.title(":bar_chart: FM24 Squad/Scouting Data Hub Replica")
 
 uploaded_file = st.file_uploader("Upload your FM24 HTML export", type="html")
+scouted_file = st.file_uploader("Optionally Upload Scouted Player HTML", type="html")
 
 if uploaded_file:
     html_string = uploaded_file.read()
     df = extract_table_from_html(html_string)
-
-    # Expand position abbreviations
     df["All Positions"] = df["Best Pos"].apply(expand_positions)
 
-    # Clone for radar + player compare sections
     filtered_df = df.copy()
 
-    # Detect column types
     potential_numeric_cols = []
     for col in df.columns:
         try:
@@ -121,389 +118,84 @@ if uploaded_file:
     numeric_cols = potential_numeric_cols
     cat_cols = [col for col in df.columns if col not in numeric_cols]
 
-    # 🔁 Optional: Upload Scouted Player File
-    scouted_file = st.file_uploader("Optionally Upload Scouted Player HTML", type="html")
-
-    if scouted_file:
-        st.markdown("✅ Scouted file uploaded — parsing now...")
-        scouted_html = scouted_file.read()
-        scouted_df = extract_table_from_html(scouted_html)
-
-        # 🧼 Clean numeric columns in scouted_df
-        scouted_numeric_cols = []
-        for col in scouted_df.columns:
-            try:
-                cleaned = pd.to_numeric(scouted_df[col].astype(str).str.replace(r"[^\d.\-]+", "", regex=True), errors='coerce')
-                if cleaned.notna().sum() > 0:
-                    scouted_numeric_cols.append(col)
-                    scouted_df[col] = cleaned
-            except:
-                continue
-
-        scouted_cat_cols = [col for col in scouted_df.columns if col not in scouted_numeric_cols]
-
-        # 🔄 Expand positions if present
-        if "Best Pos" in scouted_df.columns:
-            scouted_df["All Positions"] = scouted_df["Best Pos"].apply(expand_positions)
-        else:
-            scouted_df["All Positions"] = [[]] * len(scouted_df)
-
-        st.success("Scouted data loaded and processed.")
-    else:
-        scouted_df = pd.DataFrame()
-        scouted_numeric_cols = []
-        scouted_cat_cols = []
-
-    
-    
-    
-    
-    
-    
-    # Tabs
-    compare_tab, analytics_tab, scatter_tab, radar_tab, depth_tab, raw_tab = st.tabs([
-        "🆚 Compare Players",
+    compare_tab, analytics_tab, radar_tab, depth_tab, raw_tab = st.tabs([
+        "🪪 Compare Players",
         "📊 Player Analytics",
-        "⭕ Scatter Plot",
         "🍕 Radar Comparison",
         "📌 Squad Depth",
         "📋 Raw Data"
     ])
 
+    with compare_tab:
+        st.subheader("🪪 Compare My Squad vs. Scouted Players")
 
-    
-    
-    
-    # 📊 PLAYER ANALYTICS TAB
-    with analytics_tab:
-        st.subheader("📊 Player Analytics Overview")
+        if scouted_file:
+            scouted_html = scouted_file.read()
+            scouted_df = extract_table_from_html(scouted_html)
+            scouted_df["All Positions"] = scouted_df["Best Pos"].apply(expand_positions) if "Best Pos" in scouted_df.columns else [[]] * len(scouted_df)
 
-        def bin_player(pos_list):
-            if not isinstance(pos_list, list):
-                return "Unknown"
-            if any(pos.startswith("GK") for pos in pos_list):
-                return "Goalkeepers"
-            if any(pos.startswith("D") for pos in pos_list):
-                return "Defenders"
-            if any(pos.startswith("M") for pos in pos_list):
-                return "Midfielders"
-            if any(pos.startswith("AM") or pos.startswith("ST") for pos in pos_list):
-                return "Forwards"
-            return "Unknown"
+            scouted_numeric_cols = []
+            for col in scouted_df.columns:
+                try:
+                    cleaned = pd.to_numeric(scouted_df[col].astype(str).str.replace(r"[^\d.\-]+", "", regex=True), errors='coerce')
+                    if cleaned.notna().sum() > 0:
+                        scouted_numeric_cols.append(col)
+                        scouted_df[col] = cleaned
+                except:
+                    continue
 
-        df["Player Type"] = df["All Positions"].apply(bin_player)
+            scouted_cat_cols = [col for col in scouted_df.columns if col not in scouted_numeric_cols]
 
-        # Static scatter plots
-        default_charts = [
-            ("Assisting - Forwards", "xA/90", "K Ps/90"),
-            ("Shooting - Forwards", "ShT/90", "xG/shot"),
-            ("Goal Output - Forwards",  "xA/90", "NP-xG/90"),
-            ("Assisting - Defenders", "xA/90", "K Ps/90"),
-            ("Passing - Goalkeepers", "Pas %", "Pas A")
-        ]
+            shared_numeric = list(set(numeric_cols).intersection(scouted_numeric_cols))
+            shared_cat = list(set(cat_cols).intersection(scouted_cat_cols))
 
-        shown_any = False
+            df_shared = df[shared_cat + shared_numeric].copy()
+            df_shared["Source"] = "My Squad"
 
-        with st.expander("🧾 Show Available Columns in Dataset"):
-            st.write("**All Columns:**")
-            st.write(list(df.columns))
+            scouted_shared = scouted_df[shared_cat + shared_numeric].copy()
+            scouted_shared["Source"] = "Scouted Players"
 
-            st.write("**Detected Numeric Columns:**")
-            st.write(numeric_cols)
+            combined_df = pd.concat([df_shared, scouted_shared], ignore_index=True)
 
-            st.write("**Detected Categorical Columns:**")
-            st.write(cat_cols)
+            x_axis = st.selectbox("Select X Axis", options=shared_numeric)
+            y_axis = st.selectbox("Select Y Axis", options=shared_numeric)
 
-        st.markdown("### 🔍 Search Column Names")
-        search_term = st.text_input("Enter keyword to search column names (case-insensitive)")
+            name_col = "Name" if "Name" in combined_df.columns else None
+            hover_data = [name_col, "Source"] if name_col else ["Source"]
 
-        if search_term:
-            matching_cols = [col for col in df.columns if search_term.lower() in col.lower()]
-            if matching_cols:
-                st.success(f"Found {len(matching_cols)} matching columns:")
-                st.write(matching_cols)
-            else:
-                st.warning("No matching columns found.")
-        
-        
-        
-        
-        
-        
-        for title, x_stat, y_stat in default_charts:
-            if x_stat in df.columns and y_stat in df.columns:
-                fig = px.scatter(
-                    df,
-                    x=x_stat,
-                    y=y_stat,
-                    color="Player Type",
-                    title=title,
-                    hover_name=df[cat_cols[0]] if cat_cols else None,
-                )
-                # Larger scatter points
-                fig.update_traces(marker=dict(size=10))  # Adjust size here as needed
+            name_filter = st.text_input("Filter by player name (partial match):")
+            if name_filter and name_col:
+                combined_df = combined_df[
+                    combined_df[name_col].astype(str).str.contains(name_filter, case=False, na=False)
+                ]
 
-                # Add vertical and horizontal mean lines
-                x_mean = df[x_stat].mean()
-                y_mean = df[y_stat].mean()
-
-                fig.add_vline(x=x_mean, line_width=1, line_dash="dash", line_color="gray")
-                fig.add_hline(y=y_mean, line_width=1, line_dash="dash", line_color="gray")
-
-                fig.add_annotation(
-                    x=x_mean, y=df[y_stat].max(),
-                    text=f"Avg {x_stat}: {round(x_mean, 2)}",
-                    showarrow=False,
-                    yanchor="bottom",
-                    font=dict(size=10),
-                    #bgcolor="white",
-                    opacity=0.8
-                )
-
-                fig.add_annotation(
-                    x=df[x_stat].max(), y=y_mean + 0.05,
-                    text=f"Avg {y_stat}: {round(y_mean, 2)}",
-                    showarrow=False,
-                    xanchor="right",
-                    font=dict(size=10),
-                    #bgcolor="white",
-                    opacity=0.8
-                )
-
-                
-                # Optional: Add labels near the lines
-                # fig.add_annotation(
-                #     x=x_mean, y=df[y_stat].max(), text="Avg X", showarrow=False,
-                #     yanchor="bottom", font=dict(size=10), bgcolor="white", opacity=0.7
-                # )
-                # fig.add_annotation(
-                #     x=df[x_stat].max(), y=y_mean, text="Avg Y", showarrow=False,
-                #     xanchor="right", font=dict(size=10), bgcolor="white", opacity=0.7
-                # )
-
-                
-                
-                
-                
-                st.plotly_chart(fig, use_container_width=True)
-                shown_any = True
-            else:
-                st.info(f"⚠️ Skipped chart '{title}' — missing column(s): {x_stat} or {y_stat}")
-
-        if not shown_any:
-            st.warning("No analytics charts could be displayed due to missing columns in your dataset.")
-
-    # 🔴 Scatter Tab
-            
-
-    with scatter_tab:
-        st.subheader("\U0001f4c8 Custom Scatter Plot")
-
-        st.markdown("### 🔍 Searchable X and Y Axis Selection")
-        x_query = st.text_input("Search for X-axis variable:")
-        x_candidates = [col for col in numeric_cols if x_query.lower() in col.lower()] if x_query else []
-        x_axis = st.selectbox("Select X Axis", options=x_candidates, key="custom_x") if x_candidates else None
-
-        y_query = st.text_input("Search for Y-axis variable:")
-        y_candidates = [col for col in numeric_cols if y_query.lower() in col.lower()] if y_query else []
-        y_axis = st.selectbox("Select Y Axis", options=y_candidates, key="custom_y") if y_candidates else None
-
-        name_filter = st.text_input("Optional: Filter by player name (partial match)")
-
-        if "All Positions" in df.columns:
-            all_pos_flat = list(itertools.chain.from_iterable(df["All Positions"].dropna()))
-            unique_positions = sorted(set(all_pos_flat))
-        else:
-            unique_positions = df["Best Pos"].dropna().unique().tolist()
-
-        selected_positions = st.multiselect("Filter by Position", options=unique_positions, default=unique_positions)
-
-        def pos_match(pos_list):
-            if not isinstance(pos_list, list):
-                return False
-            return any(pos in pos_list for pos in selected_positions)
-
-        custom_df = df[df["All Positions"].apply(pos_match)].copy()
-
-        if name_filter:
-            custom_df = custom_df[custom_df[cat_cols[0]].astype(str).str.contains(name_filter, case=False)]
-
-        custom_df["Position_Label"] = custom_df["All Positions"].apply(lambda x: ", ".join(sorted(x)) if isinstance(x, list) else str(x))
-
-        if x_axis and y_axis and x_axis in custom_df.columns and y_axis in custom_df.columns:
             fig = px.scatter(
-                custom_df,
+                combined_df,
                 x=x_axis,
                 y=y_axis,
-                color="Position_Label",
-                hover_name=cat_cols[0] if cat_cols else None,
-                title=f"Custom Scatter: {x_axis} vs {y_axis}"
+                color="Source",
+                hover_name=name_col,
+                hover_data=hover_data,
+                title=f"Comparison: {x_axis} vs {y_axis}"
             )
             fig.update_traces(marker=dict(size=10))
-
-            x_mean = custom_df[x_axis].mean()
-            y_mean = custom_df[y_axis].mean()
-            fig.add_vline(x=x_mean, line_dash="dash", line_color="gray")
-            fig.add_hline(y=y_mean, line_dash="dash", line_color="gray")
-
-            fig.add_annotation(x=x_mean, y=custom_df[y_axis].max(), text=f"Avg {x_axis}: {round(x_mean,2)}", 
-                               showarrow=False, yanchor="bottom", font=dict(size=10), opacity=0.8)
-            fig.add_annotation(x=custom_df[x_axis].max(), y=y_mean + 0.05, text=f"Avg {y_axis}: {round(y_mean,2)}", 
-                               showarrow=False, xanchor="right", font=dict(size=10), opacity=0.8)
-
             st.plotly_chart(fig, use_container_width=True)
         else:
-            st.info("Please select valid X and Y axis columns using the search boxes above.")
+            st.info("Upload a scouted player file to enable comparison.")
 
-        
-        
-        
-        
-        
-
-    # 🍕 RADAR CHART TAB
-    with radar_tab:
-        st.subheader("🍕 Player Radar Charts (Hover for Real Values)")
-
-        player_id_col = st.selectbox("Select Player Identifier", options=cat_cols, key="radar_id")
-        players = df[player_id_col].dropna().unique().tolist()
-
-        selected_players = st.multiselect(
-            "Select Players to Compare",
-            options=players,
-            default=players[:3],
-            help="Search for players by name or ID",
-            key="radar_players"
-        )
-
-        selected_stats = st.multiselect(
-            "Select Stats/Attributes to Compare",
-            options=numeric_cols,
-            default=numeric_cols[:5] if len(numeric_cols) >= 5 else numeric_cols,
-            help="Pick stats or FM attributes to visualize",
-            key="radar_stats"
-        )
-
-        if selected_players and selected_stats and len(selected_stats) >= 3:
-            radar_df = df[df[player_id_col].isin(selected_players)][[player_id_col] + selected_stats].copy()
-            radar_df = radar_df.set_index(player_id_col)
-            radar_df = radar_df.apply(pd.to_numeric, errors="coerce")
-
-            for player in selected_players:
-                player_data = radar_df.loc[player]
-
-                theta_labels = []
-                normalized_values = []
-                raw_values = []
-
-                for stat in selected_stats:
-                    raw_val = player_data.get(stat, 0)
-                    if stat in fm_attributes_0_20:
-                        norm_val = raw_val / 20.0
-                    else:
-                        max_val = radar_df[stat].max()
-                        norm_val = raw_val / max_val if max_val and max_val != 0 else 0
-
-                    theta_labels.append(stat)
-                    normalized_values.append(norm_val)
-                    raw_values.append(raw_val)
-
-                chart_data = pd.DataFrame({
-                    "Attribute": theta_labels,
-                    "Normalized": normalized_values,
-                    "RawValue": raw_values
-                })
-
-                fig = px.line_polar(
-                    chart_data,
-                    r="Normalized",
-                    theta="Attribute",
-                    line_close=True,
-                    title=f"Radar Chart for {player}",
-                    custom_data=["RawValue"]
-                )
-                fig.update_traces(
-                    fill='toself',
-                    hovertemplate="%{theta}: %{customdata[0]}<extra></extra>"
-                )
-                st.plotly_chart(fig, use_container_width=True)
-        elif selected_players and len(selected_stats) < 3:
-            st.info("Please select at least 3 attributes to enable radar comparison.")
-
-    # 📌 SQUAD DEPTH TAB
-    with depth_tab:
-        st.sidebar.title("🎯 Squad Depth Filter")
-        position_col = st.sidebar.selectbox("Position Column", options=cat_cols)
-
-        sort_mode = st.sidebar.radio(
-            "Sort Squad Depth Chart By:",
-            options=["Player Count Asc", "Player Count Desc", "Field Position Order"],
-            index=2
-        )
-
-        if position_col == "All Positions":
-            all_pos_flat = list(itertools.chain.from_iterable(df["All Positions"].dropna()))
-            unique_positions = sorted(set(all_pos_flat))
-        else:
-            unique_positions = df[position_col].dropna().unique().tolist()
-
-        selected_positions = st.sidebar.multiselect(
-            "Select Positions (affects squad depth only)",
-            unique_positions,
-            default=unique_positions
-        )
-
-        if position_col == "All Positions":
-            def contains_selected(position_list):
-                try:
-                    return any(pos in position_list for pos in selected_positions)
-                except TypeError:
-                    return False
-            squad_df = df[df["All Positions"].apply(contains_selected)]
-        else:
-            squad_df = df[df[position_col].isin(selected_positions)]
-
-        st.caption(f"✅ Found {len(squad_df)} players matching position filter.")
-
-        st.subheader("📌 Squad Depth by Position (Unraveled from 'Best Pos')")
-
-        if not squad_df.empty:
-            pos_exploded = squad_df.explode("All Positions")
-            pos_counts = pos_exploded["All Positions"].value_counts().reset_index()
-            pos_counts.columns = ["Position", "Player Count"]
-
-            if sort_mode == "Player Count Asc":
-                pos_counts = pos_counts.sort_values("Player Count", ascending=True)
-            elif sort_mode == "Player Count Desc":
-                pos_counts = pos_counts.sort_values("Player Count", ascending=False)
-            elif sort_mode == "Field Position Order":
-                field_order = [
-                    "GK", "DC", "DCL", "DCR", "DL", "DR",
-                    "WBL", "WBR", "DM", "DMC", "MC", "MCL", "MCR",
-                    "ML", "MR", "AM", "AMC", "AML", "AMR",
-                    "ST", "STC", "STL", "STR"
-                ]
-                pos_counts["Position"] = pd.Categorical(pos_counts["Position"], categories=field_order, ordered=True)
-                pos_counts = pos_counts.sort_values("Position")
-
-            fig = px.bar(
-                pos_counts,
-                x="Position",
-                y="Player Count",
-                title="Squad Depth by Position",
-                labels={"Player Count": "Count"},
-            )
-            st.plotly_chart(fig, use_container_width=True)
-        else:
-            st.warning("No players matched the selected positions.")
-
-    # 📋 RAW TAB
-    with raw_tab:
-        st.subheader("💾 Raw Data Preview")
+    with analytics_tab:
+        st.subheader(":bar_chart: Player Analytics Overview")
         st.dataframe(df.head())
 
-    st.markdown("---")
-    st.caption("Prototype by BangocheFM — replicating FM24's Data Hub in Streamlit")
+    with radar_tab:
+        st.subheader(":pizza: Radar (WIP)")
+
+    with depth_tab:
+        st.subheader(":round_pushpin: Depth (WIP)")
+
+    with raw_tab:
+        st.subheader(":clipboard: Raw Data")
+        st.dataframe(df)
 
 else:
     st.info("Please upload a valid FM24 HTML export (Squad or Scouting View).")
