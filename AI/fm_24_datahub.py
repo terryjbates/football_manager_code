@@ -122,8 +122,9 @@ if uploaded_file:
     cat_cols = [col for col in df.columns if col not in numeric_cols]
 
     # Tabs
-    analytics_tab, radar_tab, depth_tab, raw_tab = st.tabs([
+    analytics_tab, scatter_tab, radar_tab, depth_tab, raw_tab = st.tabs([
         "📊 Player Analytics",
+        "⭕ Scatter Plot",
         "🍕 Radar Comparison",
         "📌 Squad Depth",
         "📋 Raw Data"
@@ -248,6 +249,73 @@ if uploaded_file:
         if not shown_any:
             st.warning("No analytics charts could be displayed due to missing columns in your dataset.")
 
+    # 🔴 Scatter Tab
+            
+
+    with scatter_tab:
+        st.subheader("\U0001f4c8 Custom Scatter Plot")
+
+        st.markdown("### 🔍 Searchable X and Y Axis Selection")
+        x_query = st.text_input("Search for X-axis variable:")
+        x_candidates = [col for col in numeric_cols if x_query.lower() in col.lower()] if x_query else []
+        x_axis = st.selectbox("Select X Axis", options=x_candidates, key="custom_x") if x_candidates else None
+
+        y_query = st.text_input("Search for Y-axis variable:")
+        y_candidates = [col for col in numeric_cols if y_query.lower() in col.lower()] if y_query else []
+        y_axis = st.selectbox("Select Y Axis", options=y_candidates, key="custom_y") if y_candidates else None
+
+        name_filter = st.text_input("Optional: Filter by player name (partial match)")
+
+        if "All Positions" in df.columns:
+            all_pos_flat = list(itertools.chain.from_iterable(df["All Positions"].dropna()))
+            unique_positions = sorted(set(all_pos_flat))
+        else:
+            unique_positions = df["Best Pos"].dropna().unique().tolist()
+
+        selected_positions = st.multiselect("Filter by Position", options=unique_positions, default=unique_positions)
+
+        def pos_match(pos_list):
+            if not isinstance(pos_list, list):
+                return False
+            return any(pos in pos_list for pos in selected_positions)
+
+        custom_df = df[df["All Positions"].apply(pos_match)].copy()
+
+        if name_filter:
+            custom_df = custom_df[custom_df[cat_cols[0]].astype(str).str.contains(name_filter, case=False)]
+
+        custom_df["Position_Label"] = custom_df["All Positions"].apply(lambda x: ", ".join(sorted(x)) if isinstance(x, list) else str(x))
+
+        if x_axis and y_axis and x_axis in custom_df.columns and y_axis in custom_df.columns:
+            fig = px.scatter(
+                custom_df,
+                x=x_axis,
+                y=y_axis,
+                color="Position_Label",
+                hover_name=cat_cols[0] if cat_cols else None,
+                title=f"Custom Scatter: {x_axis} vs {y_axis}"
+            )
+            fig.update_traces(marker=dict(size=10))
+
+            x_mean = custom_df[x_axis].mean()
+            y_mean = custom_df[y_axis].mean()
+            fig.add_vline(x=x_mean, line_dash="dash", line_color="gray")
+            fig.add_hline(y=y_mean, line_dash="dash", line_color="gray")
+
+            fig.add_annotation(x=x_mean, y=custom_df[y_axis].max(), text=f"Avg {x_axis}: {round(x_mean,2)}", 
+                               showarrow=False, yanchor="bottom", font=dict(size=10), opacity=0.8)
+            fig.add_annotation(x=custom_df[x_axis].max(), y=y_mean + 0.05, text=f"Avg {y_axis}: {round(y_mean,2)}", 
+                               showarrow=False, xanchor="right", font=dict(size=10), opacity=0.8)
+
+            st.plotly_chart(fig, use_container_width=True)
+        else:
+            st.info("Please select valid X and Y axis columns using the search boxes above.")
+
+        
+        
+        
+        
+        
 
     # 🍕 RADAR CHART TAB
     with radar_tab:
