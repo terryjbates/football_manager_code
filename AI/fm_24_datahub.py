@@ -195,7 +195,9 @@ if uploaded_file:
                     title=title,
                     hover_name=df[cat_cols[0]] if cat_cols else None,
                 )
-                
+                # Larger scatter points
+                fig.update_traces(marker=dict(size=10))  # Adjust size here as needed
+
                 # Add vertical and horizontal mean lines
                 x_mean = df[x_stat].mean()
                 y_mean = df[y_stat].mean()
@@ -203,15 +205,36 @@ if uploaded_file:
                 fig.add_vline(x=x_mean, line_width=1, line_dash="dash", line_color="gray")
                 fig.add_hline(y=y_mean, line_width=1, line_dash="dash", line_color="gray")
 
+                fig.add_annotation(
+                    x=x_mean, y=df[y_stat].max(),
+                    text=f"Avg {x_stat}: {round(x_mean, 2)}",
+                    showarrow=False,
+                    yanchor="bottom",
+                    font=dict(size=10),
+                    #bgcolor="white",
+                    opacity=0.8
+                )
+
+                fig.add_annotation(
+                    x=df[x_stat].max(), y=y_mean + 0.05,
+                    text=f"Avg {y_stat}: {round(y_mean, 2)}",
+                    showarrow=False,
+                    xanchor="right",
+                    font=dict(size=10),
+                    #bgcolor="white",
+                    opacity=0.8
+                )
+
+                
                 # Optional: Add labels near the lines
-                fig.add_annotation(
-                    x=x_mean, y=df[y_stat].max(), text="Avg X", showarrow=False,
-                    yanchor="bottom", font=dict(size=10), bgcolor="white", opacity=0.7
-                )
-                fig.add_annotation(
-                    x=df[x_stat].max(), y=y_mean, text="Avg Y", showarrow=False,
-                    xanchor="right", font=dict(size=10), bgcolor="white", opacity=0.7
-                )
+                # fig.add_annotation(
+                #     x=x_mean, y=df[y_stat].max(), text="Avg X", showarrow=False,
+                #     yanchor="bottom", font=dict(size=10), bgcolor="white", opacity=0.7
+                # )
+                # fig.add_annotation(
+                #     x=df[x_stat].max(), y=y_mean, text="Avg Y", showarrow=False,
+                #     xanchor="right", font=dict(size=10), bgcolor="white", opacity=0.7
+                # )
 
                 
                 
