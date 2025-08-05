@@ -121,8 +121,48 @@ if uploaded_file:
     numeric_cols = potential_numeric_cols
     cat_cols = [col for col in df.columns if col not in numeric_cols]
 
+    # 🔁 Optional: Upload Scouted Player File
+    scouted_file = st.file_uploader("Optionally Upload Scouted Player HTML", type="html")
+
+    if scouted_file:
+        st.markdown("✅ Scouted file uploaded — parsing now...")
+        scouted_html = scouted_file.read()
+        scouted_df = extract_table_from_html(scouted_html)
+
+        # 🧼 Clean numeric columns in scouted_df
+        scouted_numeric_cols = []
+        for col in scouted_df.columns:
+            try:
+                cleaned = pd.to_numeric(scouted_df[col].astype(str).str.replace(r"[^\d.\-]+", "", regex=True), errors='coerce')
+                if cleaned.notna().sum() > 0:
+                    scouted_numeric_cols.append(col)
+                    scouted_df[col] = cleaned
+            except:
+                continue
+
+        scouted_cat_cols = [col for col in scouted_df.columns if col not in scouted_numeric_cols]
+
+        # 🔄 Expand positions if present
+        if "Best Pos" in scouted_df.columns:
+            scouted_df["All Positions"] = scouted_df["Best Pos"].apply(expand_positions)
+        else:
+            scouted_df["All Positions"] = [[]] * len(scouted_df)
+
+        st.success("Scouted data loaded and processed.")
+    else:
+        scouted_df = pd.DataFrame()
+        scouted_numeric_cols = []
+        scouted_cat_cols = []
+
+    
+    
+    
+    
+    
+    
     # Tabs
-    analytics_tab, scatter_tab, radar_tab, depth_tab, raw_tab = st.tabs([
+    compare_tab, analytics_tab, scatter_tab, radar_tab, depth_tab, raw_tab = st.tabs([
+        "🆚 Compare Players",
         "📊 Player Analytics",
         "⭕ Scatter Plot",
         "🍕 Radar Comparison",
@@ -130,6 +170,10 @@ if uploaded_file:
         "📋 Raw Data"
     ])
 
+
+    
+    
+    
     # 📊 PLAYER ANALYTICS TAB
     with analytics_tab:
         st.subheader("📊 Player Analytics Overview")
