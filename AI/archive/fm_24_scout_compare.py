@@ -142,18 +142,18 @@ with compare_tab:
 
     gk_hover = ["xGP", "Ecc", "Aer", "1v1", "Cmd", "Com"]
 
-    if "Reflexes" in gk_df.columns and "xSv %" in gk_df.columns:
+    if "Ref" in gk_df.columns and "xSv %" in gk_df.columns:
         fig1 = px.scatter(
             gk_df,
-            x="Reflexes",
+            x="Ref",
             y="xSv %",
             color="Source",
             hover_name=name_col,
             hover_data=gk_hover,
-            title="Reflexes vs Expected Save Percentage (xSv %)"
+            title="Ref vs Expected Save Percentage (xSv %)"
         )
         fig1.update_traces(marker=dict(size=10))
-        fig1.add_vline(x=gk_df["Reflexes"].mean(), line_dash="dash", line_color="gray")
+        fig1.add_vline(x=gk_df["Ref"].mean(), line_dash="dash", line_color="gray")
         fig1.add_hline(y=gk_df["xSv %"].mean(), line_dash="dash", line_color="gray")
         st.plotly_chart(fig1, use_container_width=True)
 
