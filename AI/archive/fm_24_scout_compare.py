@@ -105,8 +105,8 @@ st.sidebar.title("🌿 Filters")
 all_positions = sorted(set(itertools.chain.from_iterable(combined_df["All Positions"].dropna())))
 selected_positions = st.sidebar.multiselect("Filter by Position", options=all_positions, default=all_positions)
 
-# Static Attribute Filters
 
+# New Static Attribute Filters
 
 with st.sidebar.expander("🎛️ Attribute Filters (1-20)", expanded=True):
     slider_style = """
@@ -130,11 +130,13 @@ with st.sidebar.expander("🎛️ Attribute Filters (1-20)", expanded=True):
             help=f"Filter players based on {attrib} (1–20 scale)"
         )
 
+# # OLD Static Attribute Filters
 # st.sidebar.markdown("---")
 # st.sidebar.markdown("### Attribute Filters (1-20)")
 # attrib_filters = {}
 # for attrib in ATTRIBUTE_FILTERS:
 #     attrib_filters[attrib] = st.sidebar.slider(f"{attrib}", 1, 20, (1, 20))
+
 
 # Apply Filters
 def satisfies_all_attr_ranges(row):
@@ -221,18 +223,18 @@ with compare_tab:
 
     cb_hover = ["Agg", "Mar", "Tck", "Pos", "Str", "Height"]
 
-    if "Jum" in cb_df.columns and "Hdrs W/90" in cb_df.columns:
+    if "Aer A/90" in cb_df.columns and "Hdrs W/90" in cb_df.columns:
         fig3 = px.scatter(
             cb_df,
-            x="Jum",
+            x="Aer A/90",
             y="Hdrs W/90",
             color="Source",
             hover_name=name_col,
             hover_data=cb_hover,
-            title="Jumping vs Headers Won per 90"
+            title="Aerial Duels Attempted per 90 vs Headers Won per 90"
         )
         fig3.update_traces(marker=dict(size=10))
-        fig3.add_vline(x=cb_df["Jum"].mean(), line_dash="dash", line_color="gray")
+        fig3.add_vline(x=cb_df["Aer A/90"].mean(), line_dash="dash", line_color="gray")
         fig3.add_hline(y=cb_df["Hdrs W/90"].mean(), line_dash="dash", line_color="gray")
         st.plotly_chart(fig3, use_container_width=True)
 
