@@ -32,7 +32,7 @@ def extract_table_from_html(html):
     return df
 
 # =============================================================================
-# 🧩 COLUMN CLEANING & TYPE DETECTION
+# 🪩 COLUMN CLEANING & TYPE DETECTION
 # =============================================================================
 
 def clean_numeric_column(series):
@@ -98,12 +98,16 @@ st.title(":bar_chart: FM24 Scouting Hub")
 uploaded_file = st.file_uploader("Upload your FM24 HTML export", type="html")
 scouted_file = st.file_uploader("Optionally Upload Scouted Player HTML", type="html")
 
+ALL_POSITIONS = [
+    "GK", "DR", "DL", "DC", "WBR", "WBL", "DM", "MR", "ML", "MC",
+    "AMR", "AML", "AMC", "ST", "STC", "DMC", "AM", "D/WB(R)", "D/WB(L)",
+    "D/M(R)", "D/M(L)", "M/AM(R)", "M/AM(L)", "M/AM(C)"
+]
+
 if uploaded_file:
     html_string = uploaded_file.read()
     df = extract_table_from_html(html_string)
     df["All Positions"] = df["Best Pos"].apply(expand_positions)
-
-    filtered_df = df.copy()
 
     potential_numeric_cols = []
     for col in df.columns:
@@ -118,84 +122,63 @@ if uploaded_file:
     numeric_cols = potential_numeric_cols
     cat_cols = [col for col in df.columns if col not in numeric_cols]
 
-    compare_tab, analytics_tab, radar_tab, depth_tab, raw_tab = st.tabs([
-        "🪪 Compare Players",
-        "📊 Player Analytics",
-        "🍕 Radar Comparison",
-        "📌 Squad Depth",
-        "📋 Raw Data"
-    ])
+    st.sidebar.header("🔍 Filter by Position")
+    selected_positions = st.sidebar.multiselect("Select position(s):", options=ALL_POSITIONS, default=ALL_POSITIONS)
 
-    with compare_tab:
-        st.subheader("🪪 Compare My Squad vs. Scouted Players")
+    if scouted_file:
+        scouted_html = scouted_file.read()
+        scouted_df = extract_table_from_html(scouted_html)
+        scouted_df["All Positions"] = scouted_df["Best Pos"].apply(expand_positions) if "Best Pos" in scouted_df.columns else [[]] * len(scouted_df)
 
-        if scouted_file:
-            scouted_html = scouted_file.read()
-            scouted_df = extract_table_from_html(scouted_html)
-            scouted_df["All Positions"] = scouted_df["Best Pos"].apply(expand_positions) if "Best Pos" in scouted_df.columns else [[]] * len(scouted_df)
+        for col in scouted_df.columns:
+            try:
+                cleaned = pd.to_numeric(scouted_df[col].astype(str).str.replace(r"[^\d.\-]+", "", regex=True), errors='coerce')
+                if cleaned.notna().sum() > 0:
+                    scouted_df[col] = cleaned
+            except:
+                continue
 
-            scouted_numeric_cols = []
-            for col in scouted_df.columns:
-                try:
-                    cleaned = pd.to_numeric(scouted_df[col].astype(str).str.replace(r"[^\d.\-]+", "", regex=True), errors='coerce')
-                    if cleaned.notna().sum() > 0:
-                        scouted_numeric_cols.append(col)
-                        scouted_df[col] = cleaned
-                except:
-                    continue
+        shared_numeric = list(set(numeric_cols).intersection(scouted_df.columns))
+        name_col = "Name" if "Name" in df.columns and "Name" in scouted_df.columns else None
 
-            scouted_cat_cols = [col for col in scouted_df.columns if col not in scouted_numeric_cols]
+        df["Source"] = "My Squad"
+        scouted_df["Source"] = "Scouted Players"
 
-            shared_numeric = list(set(numeric_cols).intersection(scouted_numeric_cols))
-            shared_cat = list(set(cat_cols).intersection(scouted_cat_cols))
+        combined_df = pd.concat([df, scouted_df], ignore_index=True)
 
-            df_shared = df[shared_cat + shared_numeric].copy()
-            df_shared["Source"] = "My Squad"
+        def position_match(pos_list):
+            if not isinstance(pos_list, list):
+                return False
+            return any(pos in pos_list for pos in selected_positions)
 
-            scouted_shared = scouted_df[shared_cat + shared_numeric].copy()
-            scouted_shared["Source"] = "Scouted Players"
+        combined_df = combined_df[combined_df["All Positions"].apply(position_match)]
 
-            combined_df = pd.concat([df_shared, scouted_shared], ignore_index=True)
+        st.subheader("🕵️ Compare Players")
 
-            x_axis = st.selectbox("Select X Axis", options=shared_numeric)
-            y_axis = st.selectbox("Select Y Axis", options=shared_numeric)
+        x_axis = st.selectbox("Select X Axis", options=shared_numeric)
+        y_axis = st.selectbox("Select Y Axis", options=shared_numeric)
 
-            name_col = "Name" if "Name" in combined_df.columns else None
-            hover_data = [name_col, "Source"] if name_col else ["Source"]
+        name_filter = st.text_input("Filter by player name (optional):")
+        if name_filter and name_col:
+            combined_df = combined_df[
+                combined_df[name_col].astype(str).str.contains(name_filter, case=False, na=False)
+            ]
 
-            name_filter = st.text_input("Filter by player name (partial match):")
-            if name_filter and name_col:
-                combined_df = combined_df[
-                    combined_df[name_col].astype(str).str.contains(name_filter, case=False, na=False)
-                ]
+        fig = px.scatter(
+            combined_df,
+            x=x_axis,
+            y=y_axis,
+            color="Source",
+            hover_name=name_col if name_col else "Source",
+            title=f"Comparison: {x_axis} vs {y_axis}"
+        )
+        fig.update_traces(marker=dict(size=10))
+        st.plotly_chart(fig, use_container_width=True)
+    else:
+        st.warning("Upload a scouting file to enable player comparison.")
 
-            fig = px.scatter(
-                combined_df,
-                x=x_axis,
-                y=y_axis,
-                color="Source",
-                hover_name=name_col,
-                hover_data=hover_data,
-                title=f"Comparison: {x_axis} vs {y_axis}"
-            )
-            fig.update_traces(marker=dict(size=10))
-            st.plotly_chart(fig, use_container_width=True)
-        else:
-            st.info("Upload a scouted player file to enable comparison.")
-
-    with analytics_tab:
-        st.subheader(":bar_chart: Player Analytics Overview")
-        st.dataframe(df.head())
-
-    with radar_tab:
-        st.subheader(":pizza: Radar (WIP)")
-
-    with depth_tab:
-        st.subheader(":round_pushpin: Depth (WIP)")
-
-    with raw_tab:
-        st.subheader(":clipboard: Raw Data")
+    with st.expander(":clipboard: Raw Data"):
         st.dataframe(df)
 
 else:
-    st.info("Please upload a valid FM24 HTML export (Squad or Scouting View).")
+    st.info("Please upload a valid FM24 HTML export (Squad View).")
