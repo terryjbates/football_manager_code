@@ -20,10 +20,12 @@ ATTRIBUTES = [
     "Fre", "L Th", "Pen", "Kic", "Cmd", "Com", "Ecc", "1v1", "Aer"
 ]
 
+ATTRIBUTE_FILTERS = ["Pac", "Str", "Acc", "Wor", "Agg", "Det", "Cmp"]
+
 META_COLS = ["Name", "Source", "Best Pos", "All Positions"]
 
 # =============================================================================
-# 📅 Loaders & Parsers
+# 🗓️ Loaders & Parsers
 # =============================================================================
 
 def extract_table_from_html(html):
@@ -99,11 +101,51 @@ else:
 combined_df.reset_index(drop=True, inplace=True)
 
 # Sidebar Position Filter
+st.sidebar.title("🌿 Filters")
 all_positions = sorted(set(itertools.chain.from_iterable(combined_df["All Positions"].dropna())))
 selected_positions = st.sidebar.multiselect("Filter by Position", options=all_positions, default=all_positions)
 
+# Static Attribute Filters
+
+
+with st.sidebar.expander("🎛️ Attribute Filters (1-20)", expanded=True):
+    slider_style = """
+    <style>
+    .stSlider > div[data-baseweb="slider"] {
+        padding-top: 10px;
+        padding-bottom: 10px;
+    }
+    </style>
+    """
+    st.markdown(slider_style, unsafe_allow_html=True)
+
+    attrib_filters = {}
+    for attrib in ATTRIBUTE_FILTERS:
+        attrib_filters[attrib] = st.slider(
+            f"{attrib}",
+            min_value=1,
+            max_value=20,
+            value=(1, 20),
+            step=1,
+            help=f"Filter players based on {attrib} (1–20 scale)"
+        )
+
+# st.sidebar.markdown("---")
+# st.sidebar.markdown("### Attribute Filters (1-20)")
+# attrib_filters = {}
+# for attrib in ATTRIBUTE_FILTERS:
+#     attrib_filters[attrib] = st.sidebar.slider(f"{attrib}", 1, 20, (1, 20))
+
+# Apply Filters
+def satisfies_all_attr_ranges(row):
+    for attr, (min_val, max_val) in attrib_filters.items():
+        if attr not in row or pd.isna(row[attr]) or not (min_val <= row[attr] <= max_val):
+            return False
+    return True
+
 pos_mask = combined_df["All Positions"].apply(lambda pos_list: any(pos in pos_list for pos in selected_positions) if isinstance(pos_list, list) else False)
-filtered_df = combined_df[pos_mask].copy()
+attr_mask = combined_df.apply(satisfies_all_attr_ranges, axis=1)
+filtered_df = combined_df[pos_mask & attr_mask].copy()
 
 # Tabs Setup
 compare_tab, raw_tab = st.tabs(["🧪 Compare Players", "📋 Raw Data"])
