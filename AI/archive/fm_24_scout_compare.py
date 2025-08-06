@@ -23,7 +23,7 @@ ATTRIBUTES = [
 META_COLS = ["Name", "Source", "Best Pos", "All Positions"]
 
 # =============================================================================
-# 📥 Loaders & Parsers
+# 📅 Loaders & Parsers
 # =============================================================================
 
 def extract_table_from_html(html):
@@ -49,7 +49,7 @@ def expand_positions(pos_string):
     return sorted(set(expanded))
 
 # =============================================================================
-# 🧹 Cleaning
+# 🧋 Cleaning
 # =============================================================================
 
 def clean_numeric_columns(df):
@@ -137,23 +137,23 @@ with compare_tab:
 
     # Goalkeeper Plot
     st.markdown("---")
-    st.subheader("🧲 Goalkeeper Assessment")
+    st.subheader("🪒 Goalkeeper Assessment")
     gk_df = filtered_df[filtered_df["All Positions"].apply(lambda pos: any(p.startswith("GK") for p in pos))]
 
     gk_hover = ["xGP", "Ecc", "Aer", "1v1", "Cmd", "Com"]
 
-    if "Ref" in gk_df.columns and "xSv %" in gk_df.columns:
+    if "Reflexes" in gk_df.columns and "xSv %" in gk_df.columns:
         fig1 = px.scatter(
             gk_df,
-            x="Ref",
+            x="Reflexes",
             y="xSv %",
             color="Source",
             hover_name=name_col,
             hover_data=gk_hover,
-            title="Ref vs Expected Save Percentage (xSv %)"
+            title="Reflexes vs Expected Save Percentage (xSv %)"
         )
         fig1.update_traces(marker=dict(size=10))
-        fig1.add_vline(x=gk_df["Ref"].mean(), line_dash="dash", line_color="gray")
+        fig1.add_vline(x=gk_df["Reflexes"].mean(), line_dash="dash", line_color="gray")
         fig1.add_hline(y=gk_df["xSv %"].mean(), line_dash="dash", line_color="gray")
         st.plotly_chart(fig1, use_container_width=True)
 
@@ -171,6 +171,58 @@ with compare_tab:
         fig2.add_vline(x=gk_df["Kic"].mean(), line_dash="dash", line_color="gray")
         fig2.add_hline(y=gk_df["Pas %"].mean(), line_dash="dash", line_color="gray")
         st.plotly_chart(fig2, use_container_width=True)
+
+    # Centerback Plots
+    st.markdown("---")
+    st.subheader("🛡️ Center Back Assessment")
+    cb_df = filtered_df[filtered_df["All Positions"].apply(lambda pos: any(p.startswith("DC") for p in pos))]
+
+    cb_hover = ["Agg", "Mar", "Tck", "Pos", "Str", "Height"]
+
+    if "Jum" in cb_df.columns and "Hdrs W/90" in cb_df.columns:
+        fig3 = px.scatter(
+            cb_df,
+            x="Jum",
+            y="Hdrs W/90",
+            color="Source",
+            hover_name=name_col,
+            hover_data=cb_hover,
+            title="Jumping vs Headers Won per 90"
+        )
+        fig3.update_traces(marker=dict(size=10))
+        fig3.add_vline(x=cb_df["Jum"].mean(), line_dash="dash", line_color="gray")
+        fig3.add_hline(y=cb_df["Hdrs W/90"].mean(), line_dash="dash", line_color="gray")
+        st.plotly_chart(fig3, use_container_width=True)
+
+    if "Tck/90" in cb_df.columns and "Int/90" in cb_df.columns:
+        fig4 = px.scatter(
+            cb_df,
+            x="Tck/90",
+            y="Int/90",
+            color="Source",
+            hover_name=name_col,
+            hover_data=cb_hover,
+            title="Tackles per 90 vs Interceptions per 90"
+        )
+        fig4.update_traces(marker=dict(size=10))
+        fig4.add_vline(x=cb_df["Tck/90"].mean(), line_dash="dash", line_color="gray")
+        fig4.add_hline(y=cb_df["Int/90"].mean(), line_dash="dash", line_color="gray")
+        st.plotly_chart(fig4, use_container_width=True)
+
+    if "Pas %" in cb_df.columns and "K Ps/90" in cb_df.columns:
+        fig5 = px.scatter(
+            cb_df,
+            x="Pas %",
+            y="K Ps/90",
+            color="Source",
+            hover_name=name_col,
+            hover_data=cb_hover,
+            title="Passing % vs Key Passes per 90"
+        )
+        fig5.update_traces(marker=dict(size=10))
+        fig5.add_vline(x=cb_df["Pas %"].mean(), line_dash="dash", line_color="gray")
+        fig5.add_hline(y=cb_df["K Ps/90"].mean(), line_dash="dash", line_color="gray")
+        st.plotly_chart(fig5, use_container_width=True)
 
 with raw_tab:
     st.subheader(":clipboard: Raw Data")
