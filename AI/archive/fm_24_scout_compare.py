@@ -268,6 +268,76 @@ with compare_tab:
         fig5.add_hline(y=cb_df["K Ps/90"].mean(), line_dash="dash", line_color="gray")
         st.plotly_chart(fig5, use_container_width=True)
 
+         
+        
+    # Full-Back / Wing-Back Plots
+    st.markdown("---")
+    st.subheader("🏃 Full-Back / Wing-Back Assessment")
+    fb_df = filtered_df[filtered_df["All Positions"].apply(lambda pos: any(p.startswith("DL") or p.startswith("DR") 
+                                                                           or p.startswith("WB") for p in pos))]
+
+    fb_hover = ["Cro", "Tck", "Pas", "Cmp", "Tec", "Wor", "Acc", "Agg", "Sta", "Dri", "Drb/90"]
+
+    if "Tck" in fb_df.columns and "Int/90" in fb_df.columns:
+        fig_fb1 = px.scatter(
+            fb_df,
+            x="Tck",
+            y="Int/90",
+            color="Source",
+            hover_name=name_col,
+            hover_data=fb_hover,
+            title="Tackling vs Interceptions per 90 (Defensive Workrate)"
+        )
+        fig_fb1.update_traces(marker=dict(size=10))
+        fig_fb1.add_vline(x=fb_df["Tck"].mean(), line_dash="dash", line_color="gray")
+        fig_fb1.add_hline(y=fb_df["Int/90"].mean(), line_dash="dash", line_color="gray")
+        st.plotly_chart(fig_fb1, use_container_width=True)
+
+    if "Cro" in fb_df.columns and "Crs C/90" in fb_df.columns:
+        fig_fb2 = px.scatter(
+            fb_df,
+            x="Cro",
+            y="Crs C/90",
+            color="Source",
+            hover_name=name_col,
+            hover_data=fb_hover,
+            title="Crossing vs Crosses Completed per 90 (Attacking Threat)"
+        )
+        fig_fb2.update_traces(marker=dict(size=10))
+        fig_fb2.add_vline(x=fb_df["Cro"].mean(), line_dash="dash", line_color="gray")
+        fig_fb2.add_hline(y=fb_df["Crs C/90"].mean(), line_dash="dash", line_color="gray")
+        st.plotly_chart(fig_fb2, use_container_width=True)
+
+    if "Dri" in fb_df.columns and "Drb/90" in fb_df.columns:
+        fig_fb3 = px.scatter(
+            fb_df,
+            x="Dri",
+            y="Drb/90",
+            color="Source",
+            hover_name=name_col,
+            hover_data=fb_hover,
+            title="Dribbling vs Progressive Runs per 90"
+        )
+        fig_fb3.update_traces(marker=dict(size=10))
+        fig_fb3.add_vline(x=fb_df["Dri"].mean(), line_dash="dash", line_color="gray")
+        fig_fb3.add_hline(y=fb_df["Drb/90"].mean(), line_dash="dash", line_color="gray")
+        st.plotly_chart(fig_fb3, use_container_width=True)
+
+    if "Cmp" in fb_df.columns and "Poss Lost/90" in fb_df.columns:
+        fig_fb4 = px.scatter(
+            fb_df,
+            x="Cmp",
+            y="Poss Lost/90",
+            color="Source",
+            hover_name=name_col,
+            hover_data=fb_hover,
+            title="Composure vs Poss Lost/90 % (Possession Retention)"
+        )
+        fig_fb4.update_traces(marker=dict(size=10))
+        fig_fb4.add_vline(x=fb_df["Cmp"].mean(), line_dash="dash", line_color="gray")
+        fig_fb4.add_hline(y=fb_df["Poss Lost/90"].mean(), line_dash="dash", line_color="gray")
+        st.plotly_chart(fig_fb4, use_container_width=True)
+
 with raw_tab:
     st.subheader(":clipboard: Raw Data")
     st.dataframe(combined_df)
