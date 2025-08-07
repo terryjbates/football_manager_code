@@ -338,6 +338,188 @@ with compare_tab:
         fig_fb4.add_hline(y=fb_df["Poss Lost/90"].mean(), line_dash="dash", line_color="gray")
         st.plotly_chart(fig_fb4, use_container_width=True)
 
+        
+    # Midfielder Plots (CM/DM)
+    st.markdown("---")
+    st.subheader("🧠 Midfield Assessment")
+    mid_df = filtered_df[filtered_df["All Positions"].apply(lambda pos: any(p.startswith("DM") or p.startswith("MC") for p in pos))]
+
+    # ========== Calculated Fields ==========
+    mid_df["Defensive Actions"] = mid_df[["Tck W", "Blk", "Clear", "Hdrs"]].sum(axis=1, skipna=True)
+    mid_df["Excitement"] = mid_df[["Gls", "Ast", "Drb", "K Pas"]].sum(axis=1, skipna=True)
+    mid_df["Scout Factor"] = (mid_df["Drb/90"] / mid_df["Poss Lost/90"]).round(3)
+
+    # ========== Progression ==========
+    st.markdown("#### 🔄 Progression")
+    prog_hover = ["Drb/90", "Dist/90", "Scout Factor", "Source"]
+
+    if "Pas" in mid_df.columns and "Pr passes/90" in mid_df.columns:
+        fig6 = px.scatter(
+            mid_df, x="Pas", y="Pr passes/90", color="Source",
+            hover_name=name_col, hover_data=prog_hover,
+            title="Passing vs Progressive Passes per 90"
+        )
+        fig6.update_traces(marker=dict(size=10))
+        fig6.add_vline(x=mid_df["Pas"].mean(), line_dash="dash", line_color="gray")
+        fig6.add_hline(y=mid_df["Pr passes/90"].mean(), line_dash="dash", line_color="gray")
+        st.plotly_chart(fig6, use_container_width=True)
+
+    if "Drb/90" in mid_df.columns and "Dist/90" in mid_df.columns:
+        fig7 = px.scatter(
+            mid_df, x="Drb/90", y="Dist/90", color="Source",
+            hover_name=name_col, hover_data=prog_hover,
+            title="Dribbles per 90 vs Distance Covered per 90"
+        )
+        fig7.update_traces(marker=dict(size=10))
+        fig7.add_vline(x=mid_df["Drb/90"].mean(), line_dash="dash", line_color="gray")
+        fig7.add_hline(y=mid_df["Dist/90"].mean(), line_dash="dash", line_color="gray")
+        st.plotly_chart(fig7, use_container_width=True)
+
+    # ========== Creation ==========
+    st.markdown("#### ✨ Creation")
+    creation_hover = ["K Ps/90", "xA/90", "OP-KP/90", "Excitement", "Source"]
+
+    if "Vis" in mid_df.columns and "K Ps/90" in mid_df.columns:
+        fig8 = px.scatter(
+            mid_df, x="Vis", y="K Ps/90", color="Source",
+            hover_name=name_col, hover_data=creation_hover,
+            title="Vision vs Key Passes per 90"
+        )
+        fig8.update_traces(marker=dict(size=10))
+        fig8.add_vline(x=mid_df["Vis"].mean(), line_dash="dash", line_color="gray")
+        fig8.add_hline(y=mid_df["K Ps/90"].mean(), line_dash="dash", line_color="gray")
+        st.plotly_chart(fig8, use_container_width=True)
+
+    if "Dec" in mid_df.columns and "xA/90" in mid_df.columns:
+        fig9 = px.scatter(
+            mid_df, x="Dec", y="xA/90", color="Source",
+            hover_name=name_col, hover_data=creation_hover,
+            title="Decisions vs Expected Assists per 90"
+        )
+        fig9.update_traces(marker=dict(size=10))
+        fig9.add_vline(x=mid_df["Dec"].mean(), line_dash="dash", line_color="gray")
+        fig9.add_hline(y=mid_df["xA/90"].mean(), line_dash="dash", line_color="gray")
+        st.plotly_chart(fig9, use_container_width=True)
+
+    # ========== Destruction ==========
+    st.markdown("#### 🧨 Destruction")
+    destruct_hover = ["Tck", "Agg", "Int/90", "Poss Won/90", "Defensive Actions", "Source"]
+
+    if "Tck" in mid_df.columns and "Tck/90" in mid_df.columns:
+        fig10 = px.scatter(
+            mid_df, x="Tck", y="Tck/90", color="Source",
+            hover_name=name_col, hover_data=destruct_hover,
+            title="Tackling vs Tackles per 90"
+        )
+        fig10.update_traces(marker=dict(size=10))
+        fig10.add_vline(x=mid_df["Tck"].mean(), line_dash="dash", line_color="gray")
+        fig10.add_hline(y=mid_df["Tck/90"].mean(), line_dash="dash", line_color="gray")
+        st.plotly_chart(fig10, use_container_width=True)
+
+    if "Agg" in mid_df.columns and "Poss Won/90" in mid_df.columns:
+        fig11 = px.scatter(
+            mid_df, x="Agg", y="Poss Won/90", color="Source",
+            hover_name=name_col, hover_data=destruct_hover,
+            title="Aggression vs Possession Won per 90"
+        )
+        fig11.update_traces(marker=dict(size=10))
+        fig11.add_vline(x=mid_df["Agg"].mean(), line_dash="dash", line_color="gray")
+        fig11.add_hline(y=mid_df["Poss Won/90"].mean(), line_dash="dash", line_color="gray")
+        st.plotly_chart(fig11, use_container_width=True)
+
+        
+# Attacking Mid & Winger Section
+st.markdown("---")
+st.subheader("🎨 Attacking Mids & Wingers")
+amw_df = filtered_df[filtered_df["All Positions"].apply(lambda pos: any(p.startswith(("AM", "ML", "MR")) for p in pos))]
+
+# Add Excitement and Scout Factor
+amw_df = amw_df.copy()
+amw_df["Excitement"] = amw_df[["Gls", "Ast", "Drb", "K Pas"]].sum(axis=1, min_count=1)
+amw_df["Scout Factor"] = (amw_df["Drb/90"] / amw_df["Poss Lost/90"]).round(3)
+
+amw_hover = ["Excitement", "Scout Factor", "Ast", "Gls", "Drb", "K Pas", "Cr C/A", "Pas %"]
+
+# Plot 1: Creativity — Key Passes vs Expected Assists
+if "K Ps/90" in amw_df.columns and "xA/90" in amw_df.columns:
+    fig1 = px.scatter(
+        amw_df,
+        x="K Ps/90",
+        y="xA/90",
+        color="Source",
+        hover_name=name_col,
+        hover_data=amw_hover,
+        title="Key Passes/90 vs xA/90"
+    )
+    fig1.update_traces(marker=dict(size=10))
+    fig1.add_vline(x=amw_df["K Ps/90"].mean(), line_dash="dash", line_color="gray")
+    fig1.add_hline(y=amw_df["xA/90"].mean(), line_dash="dash", line_color="gray")
+    st.plotly_chart(fig1, use_container_width=True)
+
+# Plot 2: Crossing Ability — Crosses Completed vs Cross Accuracy
+if "OP-Crs C/90" in amw_df.columns and "Cr C/A" in amw_df.columns:
+    fig2 = px.scatter(
+        amw_df,
+        x="OP-Crs C/90",
+        y="Cr C/A",
+        color="Source",
+        hover_name=name_col,
+        hover_data=amw_hover,
+        title="Open Play Crosses Completed/90 vs Cross Completion %"
+    )
+    fig2.update_traces(marker=dict(size=10))
+    fig2.add_vline(x=amw_df["OP-Crs C/90"].mean(), line_dash="dash", line_color="gray")
+    fig2.add_hline(y=amw_df["Cr C/A"].mean(), line_dash="dash", line_color="gray")
+    st.plotly_chart(fig2, use_container_width=True)
+
+# Plot 3: Dribbling & Risk — Dribbles/90 vs Poss Lost/90
+if "Drb/90" in amw_df.columns and "Poss Lost/90" in amw_df.columns:
+    fig3 = px.scatter(
+        amw_df,
+        x="Drb/90",
+        y="Poss Lost/90",
+        color="Source",
+        hover_name=name_col,
+        hover_data=amw_hover,
+        title="Dribbles/90 vs Possession Lost/90"
+    )
+    fig3.update_traces(marker=dict(size=10))
+    fig3.add_vline(x=amw_df["Drb/90"].mean(), line_dash="dash", line_color="gray")
+    fig3.add_hline(y=amw_df["Poss Lost/90"].mean(), line_dash="dash", line_color="gray")
+    st.plotly_chart(fig3, use_container_width=True)
+
+# Plot 4: Shot Creation — Shot % vs Shots Outside Box
+if "Shot %" in amw_df.columns and "Shots Outside Box/90" in amw_df.columns:
+    fig4 = px.scatter(
+        amw_df,
+        x="Shot %",
+        y="Shots Outside Box/90",
+        color="Source",
+        hover_name=name_col,
+        hover_data=amw_hover,
+        title="Shooting Accuracy vs Shots Outside Box"
+    )
+    fig4.update_traces(marker=dict(size=10))
+    fig4.add_vline(x=amw_df["Shot %"].mean(), line_dash="dash", line_color="gray")
+    fig4.add_hline(y=amw_df["Shots Outside Box/90"].mean(), line_dash="dash", line_color="gray")
+    st.plotly_chart(fig4, use_container_width=True)
+
+# Plot 5: Passing Impact — Pass % vs Open Play Key Passes
+if "Pas %" in amw_df.columns and "OP-KP/90" in amw_df.columns:
+    fig5 = px.scatter(
+        amw_df,
+        x="Pas %",
+        y="OP-KP/90",
+        color="Source",
+        hover_name=name_col,
+        hover_data=amw_hover,
+        title="Passing % vs Open Play Key Passes per 90"
+    )
+    fig5.update_traces(marker=dict(size=10))
+    fig5.add_vline(x=amw_df["Pas %"].mean(), line_dash="dash", line_color="gray")
+    fig5.add_hline(y=amw_df["OP-KP/90"].mean(), line_dash="dash", line_color="gray")
+    st.plotly_chart(fig5, use_container_width=True)
+
 with raw_tab:
     st.subheader(":clipboard: Raw Data")
     st.dataframe(combined_df)
